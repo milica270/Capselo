@@ -9,7 +9,7 @@ class Capsule extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['description', 'owner_id', 'published'];
+    protected $fillable = ['description', 'owner_id', 'ready', 'visible_to'];
 
     protected $casts = [
         'published' => 'boolean',
@@ -25,6 +25,7 @@ class Capsule extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'capsule_user')
+            ->withPivot('ready')
             ->withTimestamps();
     }
 

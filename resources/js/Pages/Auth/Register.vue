@@ -38,7 +38,7 @@
         <!-- Progress Bar -->
         <div class="progress mb-4" style="height: 8px;">
           <div
-            class="progress-bar bg-success"
+            class="progress-bar progress-bar-striped progress-bar-animated bg-success"
             role="progressbar"
             :style="{ width: progress + '%' }"
             :aria-valuenow="progress"

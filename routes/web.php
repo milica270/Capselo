@@ -3,6 +3,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FriendshipController;
+use App\Http\Controllers\CapsuleController;
 use App\Models\Friendship;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,9 @@ Route::delete('/friend-request/decline/{id}', [FriendshipController::class, 'dec
 Route::delete('/friend/remove/{friendId}', [FriendshipController::class, 'removeFriend'])->name('friend.remove');
 
 Route::get('/dashboard/friends', [FriendshipController::class, 'show'])->name('friends');
+
+Route::post('/capsules', [CapsuleController::class, 'store'])->name('capsules.store');
+
 });
 
 Route::delete('/account/delete', [AuthController::class, 'delete_user'])->middleware('auth')->name('account.delete');

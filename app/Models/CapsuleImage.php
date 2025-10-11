@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CapsuleImage extends Model
 {
     use HasFactory;
+    protected $table = 'capsule_image';
 
     protected $fillable = ['capsule_id', 'user_id', 'image_path'];
 

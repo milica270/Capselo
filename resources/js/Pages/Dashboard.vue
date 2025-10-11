@@ -128,7 +128,115 @@
           
         </div>
       </div>
-      <div class="col-md-7"></div>
+      
+
+<div class="col-md-7">
+  <div class="p-3 bg-white rounded shadow-sm h-100">
+    <!-- Main Title -->
+    <h6 class="mb-3 text-uppercase" style="color: var(--lightGrey)">Capsules</h6>
+
+    <!-- Mini Navbar -->
+<div class="d-flex gap-3 mb-4">
+  <button
+    class="btn btn-sm"
+    :class="{'btn-success fw-bold': activeTab === 'new', 'btn-outline-success': activeTab !== 'new'}"
+    @click="activeTab = 'new'"
+  >
+    New Capsule
+  </button>
+  <button
+    class="btn btn-sm"
+    :class="{'btn-success fw-bold': activeTab === 'drafts', 'btn-outline-success': activeTab !== 'drafts'}"
+    @click="activeTab = 'drafts'"
+  >
+    Drafts
+  </button>
+  <button
+    class="btn btn-sm"
+    :class="{'btn-success fw-bold': activeTab === 'archive', 'btn-outline-success': activeTab !== 'archive'}"
+    @click="activeTab = 'archive'"
+  >
+    Archive
+  </button>
+</div>
+
+
+    <!-- Capsule form (only show when New Capsule tab is active) -->
+    <div v-if="activeTab === 'new'">
+      <form @submit.prevent="createCapsule" class="d-flex flex-column gap-3">
+        <!-- Description -->
+        <div>
+          <label class="form-label fw-bold">Description</label>
+          <textarea v-model="capsule.description" class="form-control" rows="3" placeholder="Write something about this capsule..."></textarea>
+        </div>
+
+        <!-- Invite friends -->
+        <div>
+          <label class="form-label fw-bold">Invite friends</label>
+          <div class="d-flex flex-wrap gap-2">
+            <div
+              v-for="friend in friends"
+              :key="friend.id"
+              class="form-check"
+            >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                :id="'friend-' + friend.id"
+                :value="friend.id"
+                v-model="capsule.invited"
+              />
+              <label class="form-check-label" :for="'friend-' + friend.id">
+                {{ friend.name }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload images -->
+        <div>
+          <label class="form-label fw-bold">Add images</label>
+          <input type="file" class="form-control" multiple @change="handleImageUpload" />
+        </div>
+
+        <div>
+  <label class="form-label fw-bold">Visible to</label>
+  <select class="form-select" v-model="capsule.visibleTo">
+    <option value="me">Only me</option>
+    <option value="friends">Friends</option>
+    <option value="everyone">Everyone</option>
+  </select>
+</div>
+
+        <!-- Publish switch -->
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="publishSwitch" v-model="capsule.published" />
+          <label class="form-check-label" for="publishSwitch">Ready to publish</label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-dark fw-bold">
+          Create Capsule
+        </button>
+      </form>
+    </div>
+
+    <!-- Drafts or Archive content can go here for other tabs -->
+    <div v-else>
+      <p class="text-muted">Content for {{ activeTab }} will appear here.</p>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+      
       <div class="col-md-1"></div>
     </div>
   </div>
@@ -136,8 +244,11 @@
 
 <script setup>
 import FriendCard from '../Components/FriendCard.vue'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
+
+
+const activeTab = ref('new')
 
 const props = defineProps({
   user: Object,
@@ -186,6 +297,44 @@ const formatDate = (dateString) => {
   const date = new Date(dateString)
   const options = { year: 'numeric', month: 'long', day: 'numeric' }
   return new Intl.DateTimeFormat('en-US', options).format(date)
+}
+
+
+
+
+
+const capsule = ref({
+  description: '',
+  invited: [],
+  images: [],
+  visibleTo: 'me',
+  published: false,
+})
+
+const handleImageUpload = (event) => {
+  capsule.value.images = Array.from(event.target.files)
+}
+
+const createCapsule = () => {
+  const formData = new FormData()
+  formData.append('description', capsule.value.description)
+  formData.append('visible_to', capsule.value.visibleTo)
+  formData.append('published', capsule.value.published ? 1 : 0)
+
+  capsule.value.invited.forEach((id, index) => {
+    formData.append(`invited[${index}]`, id)
+  })
+
+ capsule.value.images.forEach(file => {
+  formData.append('images[]', file)
+})
+
+  router.post(route('capsules.store'), formData, {
+    onSuccess: () => {
+      capsule.value = { description: '', invited: [], images: [], published: false }
+      alert('Capsule created successfully!')
+    },
+  })
 }
 </script>
 
