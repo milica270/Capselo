@@ -38,7 +38,7 @@
       <!-- Requests + Recommended -->
       <div class="col-md-4">
         <div class="d-flex flex-column gap-3 h-100">
-          <!-- ✅ Friend requests -->
+          <!-- Friend requests -->
           <div class="d-flex flex-column gap-2 p-3 bg-white rounded shadow-sm flex-grow-1">
             <h6 class="text-dark mb-2">Friend Requests</h6>
 
@@ -81,11 +81,21 @@
             >
               <FriendCard :friend="recommend" />
               <button
+                v-if="!recommend.requestSent"
                 class="btn btn-sm"
                 style="color: var(--yelloworange); background-color: var(--paleyellow)"
                 @click="sendRequest(recommend.id)"
               >
                 Send Request
+              </button>
+
+              <button
+                v-else
+                class="btn btn-sm"
+                disabled
+                style="color: gray; background-color: #f0f0f0;"
+              >
+                Request Sent
               </button>
             </div>
           </div>
@@ -111,9 +121,7 @@
                 :key="user.id"
                 class="d-flex align-items-center justify-content-between"
               >
-                <div class="d-flex flex-column">
-                  <FriendCard :friend="user" />
-                </div>
+                <FriendCard :friend="user" />
 
                 <template v-if="user.id !== authUserId">
                   <button
@@ -164,7 +172,7 @@
 
 <script setup>
 import FriendCard from '../Components/FriendCard.vue'
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -220,6 +228,10 @@ const sendRequest = (friendId) => {
         friend_id: friendId,
         accepted: 0,
       })
+
+      // mark as sent in recommended
+      const user = recommended.value.find(u => u.id === friendId)
+      if (user) user.requestSent = true
     },
   })
 }
@@ -273,12 +285,17 @@ const removeFriend = (friendId) => {
   }
 }
 
-// ✅ Recommended friends
-const recommended = computed(() => {
+// ✅ Recommended friends — generate once
+const recommended = ref([])
+
+onMounted(() => {
+  generateRecommended()
+})
+
+const generateRecommended = () => {
   const friendsIds = friends.value.map(f => f.id)
   const friendsOfFriendsIds = new Set()
 
-  // Iterate over all friendships to find friends of friends
   props.friendships.forEach(f => {
     if (f.accepted !== 1) return
     let friendId = null
@@ -290,20 +307,20 @@ const recommended = computed(() => {
     }
   })
 
-  // Map ids to user objects
   let recommendedUsers = Array.from(friendsOfFriendsIds)
     .map(id => props.users.find(u => u.id === id))
     .filter(Boolean)
 
-  // Take first 3
-  if (recommendedUsers.length > 0) return recommendedUsers.slice(0, 3)
+  if (recommendedUsers.length === 0) {
+    const potentialUsers = props.users.filter(
+      u => u.id !== authUserId && !friendsIds.includes(u.id)
+    )
+    recommendedUsers = shuffleArray(potentialUsers).slice(0, 3)
+  }
 
-  // Fallback: pick 3 random users
-  const potentialUsers = props.users.filter(
-    u => u.id !== authUserId && !friendsIds.includes(u.id)
-  )
-  return shuffleArray(potentialUsers).slice(0, 3)
-})
+  // initialize requestSent false
+  recommended.value = recommendedUsers.slice(0, 3).map(u => ({ ...u, requestSent: false }))
+}
 
 // ✅ Helper to shuffle array
 const shuffleArray = (array) => {
@@ -328,6 +345,7 @@ const shuffleArray = (array) => {
   opacity: 0.8;
 }
 </style>
+
 
 
 

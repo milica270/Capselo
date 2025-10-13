@@ -88,7 +88,7 @@
           <div class="friends-list flex-grow-1 overflow-auto mb-2">
             <div v-if="friends.length">
               <div
-                v-for="friend in friends.slice(0, 3)" 
+                v-for="friend in friends.slice(0, 4)" 
                 :key="friend.id"
                 class="d-flex align-items-center justify-content-between mb-2"
               >
@@ -111,7 +111,7 @@
             class="mt-2 text-decoration-none"
             style="font-size: 0.9rem"
           >
-            See all
+            See all friends
           </Link>
 
           <!-- Requests link -->
@@ -131,32 +131,35 @@
       
 
 <div class="col-md-7">
-  <div class="p-3 bg-white rounded shadow-sm h-100">
+  <div ref="scrollContainer" class="p-3 bg-white rounded shadow-sm h-100">
     <!-- Main Title -->
     <h6 class="mb-3 text-uppercase" style="color: var(--lightGrey)">Capsules</h6>
 
     <!-- Mini Navbar -->
 <div class="d-flex gap-3 mb-4">
   <button
-    class="btn btn-sm"
+    class="btn btn-sm d-flex align-items-center gap-1"
     :class="{'btn-success fw-bold': activeTab === 'new', 'btn-outline-success': activeTab !== 'new'}"
     @click="activeTab = 'new'"
   >
-    New Capsule
+  <i class="bi bi-plus-circle fs-5"></i>
+    <span>New Capsule</span>
   </button>
   <button
-    class="btn btn-sm"
+    class="btn btn-sm d-flex align-items-center gap-1"
     :class="{'btn-success fw-bold': activeTab === 'drafts', 'btn-outline-success': activeTab !== 'drafts'}"
     @click="activeTab = 'drafts'"
   >
-    Drafts
+  <i class="bi bi-file-earmark-text fs-5"></i>
+  <span>Drafts</span>
   </button>
   <button
-    class="btn btn-sm"
+    class="btn btn-sm d-flex align-items-center gap-1"
     :class="{'btn-success fw-bold': activeTab === 'archive', 'btn-outline-success': activeTab !== 'archive'}"
     @click="activeTab = 'archive'"
   >
-    Archive
+  <i class="bi bi-archive fs-5"></i>
+  <span>Archive</span>
   </button>
 </div>
 
@@ -195,7 +198,7 @@
 
         <!-- Upload images -->
         <div>
-          <label class="form-label fw-bold">Add images</label>
+          <label class="form-label fw-bold">Add images (Add as many as you wish)</label>
           <input type="file" class="form-control" multiple @change="handleImageUpload" />
         </div>
 
@@ -224,6 +227,7 @@
     <!-- Drafts or Archive content can go here for other tabs -->
     <div v-else>
       <p class="text-muted">Content for {{ activeTab }} will appear here.</p>
+      
     </div>
   </div>
 </div>
@@ -244,11 +248,31 @@
 
 <script setup>
 import FriendCard from '../Components/FriendCard.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 
 
 const activeTab = ref('new')
+const scrollContainer = ref(null)
+let lastScrollTop = 0
+
+watch(activeTab, async (newTab, oldTab) => {
+  if (scrollContainer.value) {
+    // Save current scroll position before tab change
+    lastScrollTop = scrollContainer.value.scrollTop
+  }
+
+  await nextTick()
+
+  // Restore scroll position after DOM updates
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollTop = lastScrollTop
+  }
+})
+
+
+
+
 
 const props = defineProps({
   user: Object,
@@ -330,6 +354,7 @@ const createCapsule = () => {
 })
 
   router.post(route('capsules.store'), formData, {
+  preserveScroll: true,
     onSuccess: () => {
       capsule.value = { description: '', invited: [], images: [], published: false }
       alert('Capsule created successfully!')
