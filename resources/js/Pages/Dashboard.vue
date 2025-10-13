@@ -175,26 +175,12 @@
 
         <!-- Invite friends -->
         <div>
-          <label class="form-label fw-bold">Invite friends</label>
-          <div class="d-flex flex-wrap gap-2">
-            <div
-              v-for="friend in friends"
-              :key="friend.id"
-              class="form-check"
-            >
-              <input
-                type="checkbox"
-                class="form-check-input"
-                :id="'friend-' + friend.id"
-                :value="friend.id"
-                v-model="capsule.invited"
-              />
-              <label class="form-check-label" :for="'friend-' + friend.id">
-                {{ friend.name }}
-              </label>
-            </div>
-          </div>
+          <button type="button" class="btn btn-light btn-sm fw-bold" @click="showModal = true">
+            Invite Friends ({{ capsule.invited.length }})
+          </button>
         </div>
+
+
 
         <!-- Upload images -->
         <div>
@@ -244,6 +230,39 @@
       <div class="col-md-1"></div>
     </div>
   </div>
+
+  <!-- Invite Friends Modal -->
+<div
+  v-if="showModal"
+  class="modal-backdrop d-flex align-items-center justify-content-center"
+  @click.self="showModal = false"
+>
+  <div class="modal-content p-4 rounded-3 shadow" style="width: 400px; max-height: 500px; overflow-y: auto; background: white;">
+    <h5 class="fw-bold mb-3">Invite Friends</h5>
+
+    <div v-if="friends.length">
+      <div v-for="friend in friends" :key="friend.id" class="form-check mb-2">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          :id="'modal-friend-' + friend.id"
+          :value="friend.id"
+          v-model="capsule.invited"
+        />
+        <label class="form-check-label" :for="'modal-friend-' + friend.id">
+          {{ friend.name }}
+        </label>
+      </div>
+    </div>
+    <div v-else class="text-muted">No friends available.</div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button class="btn btn-outline-secondary btn-sm" @click="showModal = false">Cancel</button>
+      <button class="btn btn-success btn-sm fw-bold" @click="showModal = false">Done</button>
+    </div>
+  </div>
+</div>
+
 </template>
 
 <script setup>
@@ -251,7 +270,7 @@ import FriendCard from '../Components/FriendCard.vue'
 import { ref, computed, watch, nextTick } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 
-
+const showModal = ref(false)
 const activeTab = ref('new')
 const scrollContainer = ref(null)
 let lastScrollTop = 0
@@ -375,5 +394,25 @@ const createCapsule = () => {
 .btn[disabled] {
   cursor: not-allowed;
   opacity: 0.8;
+}
+
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1050;
+}
+
+.modal-content {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
