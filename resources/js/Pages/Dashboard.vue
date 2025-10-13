@@ -168,10 +168,27 @@
     <div v-if="activeTab === 'new'">
       <form @submit.prevent="createCapsule" class="d-flex flex-column gap-3">
         <!-- Description -->
-        <div>
-          <label class="form-label fw-bold">Description</label>
-          <textarea v-model="capsule.description" class="form-control" rows="3" placeholder="Write something about this capsule..."></textarea>
-        </div>
+        <!-- Hashtag selection -->
+<div>
+  <label class="form-label fw-bold">Select Hashtags</label>
+
+  <div class="d-flex flex-wrap gap-2 mb-2">
+    <div v-for="tag in availableHashtags" :key="tag" class="badge bg-light text-dark border" style="cursor: pointer;"
+         @click="toggleHashtag(tag)">
+      <span :class="{'fw-bold text-success': capsule.hashtags.includes(tag)}">{{ tag }}</span>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-2">
+    <button type="button" class="btn btn-outline-primary btn-sm fw-bold" @click="addCustomHashtag">+ Add</button>
+    <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @click="removeLastHashtag" :disabled="!capsule.hashtags.length">− Remove</button>
+  </div>
+
+  <div v-if="capsule.hashtags.length">
+    <small class="text-muted">Selected: {{ capsule.hashtags.join(' ') }}</small>
+  </div>
+</div>
+
 
         <!-- Invite friends -->
         <div>
@@ -201,8 +218,13 @@
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" id="publishSwitch" v-model="capsule.published" />
           <label class="form-check-label" for="publishSwitch">Ready to publish</label>
+          
         </div>
 
+        <div class="small text-muted fst-italic ms-1">
+  <i class="bi bi-info-circle me-1 text-secondary"></i>
+  Your capsule will be published automatically once <strong>all invited users mark themselves as ready</strong>.
+</div>
         <!-- Submit -->
         <button type="submit" class="btn btn-dark fw-bold">
           Create Capsule
@@ -263,12 +285,58 @@
   </div>
 </div>
 
+
+
+
+
 </template>
 
 <script setup>
 import FriendCard from '../Components/FriendCard.vue'
 import { ref, computed, watch, nextTick } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
+import hashtagsData from '../data/hashtags.json'
+import { showToast } from '../utils/toast.js'
+
+
+const availableHashtags = ref(hashtagsData)
+
+const capsule = ref({
+  hashtags: [],
+  invited: [],
+  images: [],
+  visibleTo: 'me',
+  published: false,
+})
+
+// toggle selection
+const toggleHashtag = (tag) => {
+  const index = capsule.value.hashtags.indexOf(tag)
+  if (index === -1) {
+    capsule.value.hashtags.push(tag)
+  } else {
+    capsule.value.hashtags.splice(index, 1)
+  }
+}
+
+// add custom hashtag manually
+const addCustomHashtag = () => {
+  const newTag = prompt('Enter a new hashtag (without #):')
+  if (newTag && newTag.trim()) {
+    const formatted = newTag.startsWith('#') ? newTag : `#${newTag.trim()}`
+    if (!availableHashtags.value.includes(formatted)) {
+      availableHashtags.value.push(formatted)
+    }
+    if (!capsule.value.hashtags.includes(formatted)) {
+      capsule.value.hashtags.push(formatted)
+    }
+  }
+}
+
+// remove last selected hashtag
+const removeLastHashtag = () => {
+  capsule.value.hashtags.pop()
+}
 
 const showModal = ref(false)
 const activeTab = ref('new')
@@ -346,13 +414,6 @@ const formatDate = (dateString) => {
 
 
 
-const capsule = ref({
-  description: '',
-  invited: [],
-  images: [],
-  visibleTo: 'me',
-  published: false,
-})
 
 const handleImageUpload = (event) => {
   capsule.value.images = Array.from(event.target.files)
@@ -360,7 +421,7 @@ const handleImageUpload = (event) => {
 
 const createCapsule = () => {
   const formData = new FormData()
-  formData.append('description', capsule.value.description)
+  formData.append('description', capsule.value.hashtags.join(' '))
   formData.append('visible_to', capsule.value.visibleTo)
   formData.append('published', capsule.value.published ? 1 : 0)
 
@@ -375,9 +436,18 @@ const createCapsule = () => {
   router.post(route('capsules.store'), formData, {
   preserveScroll: true,
     onSuccess: () => {
-      capsule.value = { description: '', invited: [], images: [], published: false }
-      alert('Capsule created successfully!')
+      capsule.value.hashtags = []
+      capsule.value.invited = []
+      capsule.value.images = []
+      capsule.value.visibleTo = 'me'
+      capsule.value.published = false
+
+      showToast('Capsule created successfully!', 'success')
     },
+    onError: (errors) => {
+    console.error(errors)
+    showToast('Failed to create capsule. Please try again.', 'danger')
+  },
   })
 }
 </script>
