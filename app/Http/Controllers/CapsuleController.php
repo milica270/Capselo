@@ -127,5 +127,26 @@ class CapsuleController extends Controller
 
         return back()->with('success', 'Image deleted successfully.');
     }
+
+
+    public function updateHashtags(Request $request, $id)
+{
+    $request->validate([
+        'hashtags' => 'array',
+        'hashtags.*' => 'string',
+    ]);
+
+    $capsule = Capsule::findOrFail($id);
+
+    if ($capsule->owner_id !== Auth::id()) {
+        abort(403, 'Unauthorized');
+    }
+
+    $capsule->description = implode(' ', $request->hashtags);
+    $capsule->save();
+
+    return back();
+}
+
 }
 

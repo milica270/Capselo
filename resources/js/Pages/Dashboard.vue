@@ -250,7 +250,45 @@
         <i class="bi bi-x-lg"></i>
       </button>
 
-      <p class="fw-bold mb-2">{{ capsule.description }}</p>
+      <div v-if="editingCapsuleId === capsule.id">
+  <!-- Editing mode -->
+  <label class="form-label fw-bold">Edit Hashtags</label>
+
+  <div class="d-flex flex-wrap gap-2 mb-2">
+    <div
+      v-for="tag in availableHashtags"
+      :key="tag"
+      class="badge bg-light text-dark border"
+      style="cursor: pointer;"
+      @click="toggleEditingHashtag(tag)"
+    >
+      <span :class="{'fw-bold text-success': editingHashtags.includes(tag)}">{{ tag }}</span>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-2">
+    <button type="button" class="btn btn-outline-primary btn-sm fw-bold" @click="addCustomEditingHashtag">+ Add</button>
+    <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @click="removeLastEditingHashtag" :disabled="!editingHashtags.length">− Remove</button>
+  <button class="btn btn-outline-success btn-sm fw-bold" @click="saveHashtags(capsule.id)">Save</button>
+    <button class="btn btn-outline-secondary btn-sm fw-bold" @click="cancelEditingHashtags">Cancel</button>
+  </div>
+
+  <hr>
+</div>
+
+<div v-else>
+  <!-- Normal display -->
+  <p class="fw-bold mb-0">{{ capsule.description }}</p>
+  <button
+    v-if="capsule.owner_id === user.id"
+    class="btn btn-sm btn-outline-secondary fw-bold mb-1"
+    @click="startEditingHashtags(capsule)"
+  >
+    Edit Hashtags
+  </button>
+  <hr>
+</div>
+
 
       <!-- Capsule Images -->
       <div class="d-flex flex-wrap gap-2 mb-2">
@@ -282,6 +320,7 @@
         </div>
       </div>
 
+      <hr>
       <small class="text-muted fst-italic">
         {{ capsule.users.length }} invited friends • Visibility: {{ capsule.visible_to }}
       </small>
@@ -626,6 +665,59 @@ const deleteImage = (imageId) => {
     onSuccess: () => showToast('Image deleted successfully.', 'success'),
     onError: () => showToast('Failed to delete image.', 'danger'),
   })
+}
+
+
+
+
+const editingCapsuleId = ref(null)
+const editingHashtags = ref([])
+
+const startEditingHashtags = (capsule) => {
+  editingCapsuleId.value = capsule.id
+  editingHashtags.value = [...(capsule.description?.split(' ') || [])]
+}
+
+const cancelEditingHashtags = () => {
+  editingCapsuleId.value = null
+  editingHashtags.value = []
+}
+
+const saveHashtags = (capsuleId) => {
+  router.put(route('capsules.updateHashtags', capsuleId), {
+    hashtags: editingHashtags.value,
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      showToast('Hashtags updated successfully!', 'success')
+      editingCapsuleId.value = null
+    },
+    onError: () => showToast('Failed to update hashtags.', 'danger'),
+  })
+}
+
+// Reuse your toggle/add/remove logic for hashtag editing
+const toggleEditingHashtag = (tag) => {
+  const index = editingHashtags.value.indexOf(tag)
+  if (index === -1) editingHashtags.value.push(tag)
+  else editingHashtags.value.splice(index, 1)
+}
+
+const addCustomEditingHashtag = () => {
+  const newTag = prompt('Enter a new hashtag (without #):')
+  if (newTag && newTag.trim()) {
+    const formatted = newTag.startsWith('#') ? newTag : `#${newTag.trim()}`
+    if (!availableHashtags.value.includes(formatted)) {
+      availableHashtags.value.push(formatted)
+    }
+    if (!editingHashtags.value.includes(formatted)) {
+      editingHashtags.value.push(formatted)
+    }
+  }
+}
+
+const removeLastEditingHashtag = () => {
+  editingHashtags.value.pop()
 }
 
 </script>

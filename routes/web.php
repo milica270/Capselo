@@ -89,6 +89,8 @@ Route::delete('/capsules/{id}/leave', [CapsuleController::class, 'leave'])->name
 Route::post('/capsules/{capsule}/add-image', [CapsuleController::class, 'addImage'])->name('capsules.addImage');
 Route::delete('/capsules/image/{id}', [CapsuleController::class, 'deleteImage'])->name('capsules.deleteImage');
 
+Route::put('/capsules/{id}/updateHashtags', [CapsuleController::class, 'updateHashtags'])
+    ->name('capsules.updateHashtags');
 
 });
 
