@@ -8,22 +8,50 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Friendship;
+use App\Models\Capsule;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function dashboard() {
-        return Inertia::render('Dashboard', [
-        'user' => Auth::user(),
+  public function dashboard()
+{
+    $user = Auth::user();
+
+    $ownedDrafts = Capsule::where('capsules.owner_id', $user->id)
+        ->where(function ($q) {
+            $q->where('capsules.ready', 0) // owner's ready flag
+              ->orWhereHas('users', function ($q2) {
+                  $q2->where('capsule_user.ready', 0); // any invited user not ready
+              });
+        })
+        ->with(['users' => function ($q) {
+            $q->withPivot('ready');
+        }, 'images', 'owner'])
+        ->get();
+
+    // Invited capsules (drafts = not everyone ready)
+    $invitedDrafts = $user->invitedCapsules()
+        ->where(function ($q) {
+            $q->where('capsules.ready', 0) // owner not ready
+              ->orWhereHas('users', function ($q2) {
+                  $q2->where('capsule_user.ready', 0); // invited not ready
+              });
+        })
+        ->with(['users' => function ($q) {
+            $q->withPivot('ready');
+        }, 'images', 'owner'])
+        ->get();
+
+    return Inertia::render('Dashboard', [
+        'user' => $user,
         'users' => User::all(),
         'friendships' => Friendship::all(),
+        'ownedCapsules' => $ownedDrafts,
+        'invitedCapsules' => $invitedDrafts,
+        
     ]);
-    }
+}
 
-    public function edit_profile() {
-        return Inertia::render('EditProfile', [
-        'user' => Auth::user(),
-    ]);
-    }
 
     public function update_user(Request $request) {
         $user = Auth::user(); // or User::find($id) if updating another user

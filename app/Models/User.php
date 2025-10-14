@@ -83,7 +83,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function invitedCapsules()
     {
-        return $this->belongsToMany(Capsule::class, 'capsule_user')->withTimestamps();
+        return $this->belongsToMany(Capsule::class, 'capsule_user')->withPivot('ready')->withTimestamps();
     }
 
 

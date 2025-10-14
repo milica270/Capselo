@@ -111,7 +111,7 @@
             class="mt-2 text-decoration-none"
             style="font-size: 0.9rem"
           >
-            See all friends
+            See friends page
           </Link>
 
           <!-- Requests link -->
@@ -232,9 +232,138 @@
       </form>
     </div>
 
-    <!-- Drafts or Archive content can go here for other tabs -->
+    
+<!-- Drafts Tab -->
+<div v-if="activeTab === 'drafts'" class="d-flex flex-column gap-3">
+  <!-- Owned Capsules -->
+  <div v-if="ownedCapsules.length">
+    <h6 class="fw-bold mb-2" style="color: black">Your Drafts</h6>
+    <div
+      v-for="capsule in ownedCapsules"
+      :key="'owned-' + capsule.id"
+      class="p-3 border rounded position-relative bg-light"
+    >
+      <button
+        class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
+        @click="deleteOwnedCapsule(capsule.id)"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+
+      <p class="fw-bold mb-2">{{ capsule.description }}</p>
+
+      <!-- Capsule Images -->
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        <div
+          v-for="image in capsule.images"
+          :key="image.id"
+          class="position-relative"
+        >
+          <img
+            :src="`/storage/${image.image_path}`"
+            class="rounded"
+            width="100"
+            height="100"
+          />
+          <button
+            class="btn btn-sm btn-danger position-absolute top-0 end-0 p-0 px-1"
+            @click="deleteImage(image.id)"
+          >
+            −
+          </button>
+        </div>
+
+        <!-- Add image -->
+        <div>
+          <label class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+            +
+            <input type="file" class="d-none" @change="(e) => addImage(e, capsule.id)" />
+          </label>
+        </div>
+      </div>
+
+      <small class="text-muted fst-italic">
+        {{ capsule.users.length }} invited friends • Visibility: {{ capsule.visible_to }}
+      </small>
+    </div>
+  </div>
+
+  <!-- Invited Capsules -->
+  <div v-if="invitedCapsules.length" class="mt-4">
+    <h6 class="fw-bold mb-2" style="color: black">Capsules You’re Invited To</h6>
+    <div
+      v-for="capsule in invitedCapsules"
+      :key="'invited-' + capsule.id"
+      class="p-3 border rounded position-relative bg-light"
+    >
+      <button
+        class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
+        @click="leaveCapsule(capsule.id)"
+      >
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
+
+      <p class="fw-bold mb-2">{{ capsule.description }}</p>
+
+      <!-- Capsule Images -->
+      <div class="d-flex flex-wrap gap-2 mb-2">
+        <div
+          v-for="image in capsule.images"
+          :key="image.id"
+          class="position-relative"
+        >
+          <img
+            :src="`/storage/${image.image_path}`"
+            class="rounded"
+            width="100"
+            height="100"
+          />
+          <button
+            v-if="image.user_id === user.id"
+            class="btn btn-sm btn-danger position-absolute top-0 end-0 p-0 px-1"
+            @click="deleteImage(image.id)"
+          >
+            −
+          </button>
+        </div>
+
+        <!-- Add image -->
+        <div>
+          <label class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+            +
+            <input type="file" class="d-none" @change="(e) => addImage(e, capsule.id)" />
+          </label>
+        </div>
+      </div>
+
+      <small class="text-muted fst-italic">
+        Owner: {{ capsule.owner.name }} • Visibility: {{ capsule.visible_to }}
+      </small>
+    </div>
+  </div>
+
+  <!-- If no drafts -->
+  <div v-if="!ownedCapsules.length && !invitedCapsules.length" class="text-muted">
+    You don’t have any draft capsules yet.
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <div v-else>
       <p class="text-muted">Content for {{ activeTab }} will appear here.</p>
+      
       
     </div>
   </div>
@@ -365,6 +494,8 @@ const props = defineProps({
   user: Object,
   users: Array,
   friendships: Array,
+  ownedCapsules: Array,
+  invitedCapsules: Array,
 })
 
 const authUserId = usePage().props.auth.user.id
@@ -450,6 +581,53 @@ const createCapsule = () => {
   },
   })
 }
+
+
+
+const deleteOwnedCapsule = (id) => {
+  if (!confirm('Are you sure you want to delete this capsule?')) return
+
+  router.delete(route('capsules.destroy', id), {
+    preserveScroll: true,
+    onSuccess: () => showToast('Capsule deleted successfully.', 'success'),
+    onError: () => showToast('Failed to delete capsule.', 'danger'),
+  })
+}
+
+const leaveCapsule = (id) => {
+  if (!confirm('Are you sure you want to leave this capsule?')) return
+
+  router.delete(route('capsules.leave', id), {
+    preserveScroll: true,
+    onSuccess: () => showToast('You left the capsule.', 'success'),
+    onError: () => showToast('Failed to leave capsule.', 'danger'),
+  })
+}
+
+const addImage = (event, capsuleId) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('image', file)
+
+  router.post(route('capsules.addImage', capsuleId), formData, {
+    preserveScroll: true,
+    onSuccess: () => showToast('Image added successfully!', 'success'),
+    onError: () => showToast('Failed to add image.', 'danger'),
+  })
+}
+
+const deleteImage = (imageId) => {
+  if (!confirm('Delete this image?')) return
+
+  router.delete(route('capsules.deleteImage', imageId), {
+    preserveScroll: true,
+    onSuccess: () => showToast('Image deleted successfully.', 'success'),
+    onError: () => showToast('Failed to delete image.', 'danger'),
+  })
+}
+
 </script>
 
 <style scoped>

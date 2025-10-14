@@ -83,6 +83,13 @@ Route::get('/dashboard/friends', [FriendshipController::class, 'show'])->name('f
 
 Route::post('/capsules', [CapsuleController::class, 'store'])->name('capsules.store');
 
+
+Route::delete('/capsules/{id}', [CapsuleController::class, 'destroy'])->name('capsules.destroy');
+Route::delete('/capsules/{id}/leave', [CapsuleController::class, 'leave'])->name('capsules.leave');
+Route::post('/capsules/{capsule}/add-image', [CapsuleController::class, 'addImage'])->name('capsules.addImage');
+Route::delete('/capsules/image/{id}', [CapsuleController::class, 'deleteImage'])->name('capsules.deleteImage');
+
+
 });
 
 Route::delete('/account/delete', [AuthController::class, 'delete_user'])->middleware('auth')->name('account.delete');
