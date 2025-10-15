@@ -321,9 +321,59 @@
       </div>
 
       <hr>
-      <small class="text-muted fst-italic">
-        {{ capsule.users.length }} invited friends • Visibility: {{ capsule.visible_to }}
-      </small>
+      <!-- Ready status table -->
+<div class="mt-3">
+
+  <div class="d-flex justify-content-between align-items-center">
+  <h6 class="fw-bold mb-2">Ready to publish?</h6>
+
+  <div class="form-check form-switch">
+  <input
+    class="form-check-input"
+    type="checkbox"
+    :id="'readySwitch-' + capsule.id"
+    :checked="isUserReady(capsule)"
+    @change="toggleReady(capsule)"
+  />
+  <label class="form-check-label fw-bold" :for="'readySwitch-' + capsule.id">
+    I'm Ready to Publish
+  </label>
+</div>
+</div>
+
+  
+
+  <ul class="list-unstyled mb-0">
+    <!-- Owner -->
+    <li class="d-flex align-items-center gap-2">
+      <i
+        class="bi"
+        :class="capsule.ready ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+      ></i>
+      <span class="fw-bold">{{ user.name }} (You)</span>
+    </li>
+
+    <!-- Invited friends -->
+    <li
+      v-for="friend in capsule.users"
+      :key="'friend-' + friend.id"
+      class="d-flex align-items-center gap-2"
+    >
+      <i
+        class="bi"
+        :class="friend.pivot.ready ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+      ></i>
+      <span>{{ friend.name }}</span>
+    </li>
+  </ul>
+</div>
+
+
+
+<small class="text-muted fst-italic">
+  {{ capsule.users.length }} invited friends • Visibility: {{ capsule.visible_to }}
+</small>
+
     </div>
   </div>
 
@@ -718,6 +768,35 @@ const addCustomEditingHashtag = () => {
 
 const removeLastEditingHashtag = () => {
   editingHashtags.value.pop()
+}
+
+
+function isUserReady(capsule) {
+  // Owner readiness comes from capsule.ready
+  if (capsule.owner_id === props.user.id) {
+    return capsule.ready === 1
+  }
+
+  // For invited users: find pivot.ready
+  const friend = capsule.users.find(u => u.id === props.user.id)
+  return friend ? friend.pivot.ready === 1 : false
+}
+
+// Toggle readiness
+function toggleReady(capsule) {
+  router.post(
+    route('capsules.toggleReady', capsule.id),
+    {},
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        showToast('Your readiness has been updated!', 'success')
+      },
+      onError: () => {
+        showToast('Something went wrong.', 'danger')
+      },
+    }
+  )
 }
 
 </script>

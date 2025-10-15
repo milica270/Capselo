@@ -148,5 +148,31 @@ class CapsuleController extends Controller
     return back();
 }
 
+
+public function toggleReady(Capsule $capsule)
+{
+    $user = Auth::user();
+
+    // If the user is the owner, toggle capsules.ready
+    if ($capsule->owner_id === $user->id) {
+        $capsule->ready = !$capsule->ready;
+        $capsule->save();
+    } else {
+        // Otherwise toggle pivot ready
+        $currentReady = $capsule->users()
+            ->where('user_id', $user->id)
+            ->first()
+            ->pivot
+            ->ready ?? false;
+
+        $capsule->users()->updateExistingPivot($user->id, [
+            'ready' => !$currentReady,
+        ]);
+    }
+
+    return back();
+}
+
+
 }
 

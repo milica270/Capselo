@@ -92,6 +92,9 @@ Route::delete('/capsules/image/{id}', [CapsuleController::class, 'deleteImage'])
 Route::put('/capsules/{id}/updateHashtags', [CapsuleController::class, 'updateHashtags'])
     ->name('capsules.updateHashtags');
 
+Route::post('/capsules/{capsule}/toggle-ready', [CapsuleController::class, 'toggleReady'])->name('capsules.toggleReady');
+
+
 });
 
 Route::delete('/account/delete', [AuthController::class, 'delete_user'])->middleware('auth')->name('account.delete');
