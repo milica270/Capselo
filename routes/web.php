@@ -94,6 +94,15 @@ Route::put('/capsules/{id}/updateHashtags', [CapsuleController::class, 'updateHa
 
 Route::post('/capsules/{capsule}/toggle-ready', [CapsuleController::class, 'toggleReady'])->name('capsules.toggleReady');
 
+Route::post('/capsules/{capsule}/invite-more', [CapsuleController::class, 'inviteMore'])
+    ->name('capsules.inviteMore');
+
+Route::delete('/capsules/{capsule}/remove-invitation/{user}', [CapsuleController::class, 'removeInvitation'])
+    ->middleware('auth')
+    ->name('capsules.removeInvitation');
+
+Route::put('/capsules/{capsule}/visibility', [CapsuleController::class, 'updateVisibility'])
+    ->name('capsules.updateVisibility');
 
 });
 

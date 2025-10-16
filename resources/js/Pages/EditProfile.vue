@@ -64,13 +64,37 @@
         </div>
         </div>
           <!-- Location -->
-           <div class="d-flex align-items-center gap-3" >
-      <i class="bi bi-geo-alt-fill fs-3"></i>
-      <div class="d-flex flex-column gap-1">
-          <input type="text" style="border:1px solid var(--darkGrey)" v-model="form.country" :placeholder="user.country" class="form-control" />
-          <input type="text" style="border:1px solid var(--darkGrey)" v-model="form.city" :placeholder="user.city" class="form-control" />
+          <div class="d-flex align-items-center gap-3">
+  <i class="bi bi-geo-alt-fill fs-3"></i>
+  <div class="d-flex flex-column gap-1 flex-grow-1">
+
+    <!-- Country select -->
+    <select 
+      v-model="form.country" 
+      class="form-select" 
+      style="border:1px solid var(--darkGrey)"
+    >
+      <option value="" disabled>Select your country</option>
+      <option 
+        v-for="country in countries" 
+        :key="country" 
+        :value="country"
+      >
+        {{ country }}
+      </option>
+    </select>
+
+    <!-- City input -->
+    <input 
+      type="text" 
+      v-model="form.city" 
+      :placeholder="user.city || 'Enter your city'" 
+      class="form-control"
+      style="border:1px solid var(--darkGrey)"
+    />
+  </div>
 </div>
-</div>
+
           <!-- Role & School/Job -->
           
 
@@ -137,6 +161,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import countries from '../data/countries.json'
 
 const props = defineProps({
   user: Object

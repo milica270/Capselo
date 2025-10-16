@@ -222,7 +222,7 @@
         </div>
 
         <div class="small text-muted fst-italic ms-1">
-  <i class="bi bi-info-circle me-1 text-secondary"></i>
+  <i class="bi bi-info-circle me-1 text-dark"></i>
   Your capsule will be published automatically once <strong>all invited users mark themselves as ready</strong>.
 </div>
         <!-- Submit -->
@@ -241,7 +241,7 @@
     <div
       v-for="capsule in ownedCapsules"
       :key="'owned-' + capsule.id"
-      class="p-3 border rounded position-relative bg-light"
+      class="p-3 border rounded position-relative bg-light mb-3"
     >
       <button
         class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
@@ -368,11 +368,37 @@
   </ul>
 </div>
 
+<div class="small text-muted fst-italic ms-1 mt-2">
+  <i class="bi bi-info-circle me-1 text-dark"></i>
+  Your capsule will be published automatically once <strong>all invited users mark themselves as ready</strong>.
+</div>
+
+<!-- Invite more friends -->
+<div class="mt-3">
+  <button
+    class="btn btn-outline-secondary btn-sm fw-bold"
+    @click="openInviteModal(capsule)"
+  >
+    <i class="bi bi-person-plus-fill me-1"></i>
+    Invite More Friends
+  </button>
+</div>
 
 
-<small class="text-muted fst-italic">
-  {{ capsule.users.length }} invited friends • Visibility: {{ capsule.visible_to }}
-</small>
+
+<div class="mt-2">
+  <label class="form-label fw-bold">Visible to</label>
+  <select
+    class="form-select"
+    v-model="capsule.visible_to"
+    @change="updateVisibility(capsule)"
+    :disabled="capsule.owner_id !== user.id"
+  >
+    <option value="me">Only me</option>
+    <option value="friends">Friends</option>
+    <option value="everyone">Everyone</option>
+  </select>
+</div>
 
     </div>
   </div>
@@ -383,7 +409,7 @@
     <div
       v-for="capsule in invitedCapsules"
       :key="'invited-' + capsule.id"
-      class="p-3 border rounded position-relative bg-light"
+      class="p-3 border rounded position-relative bg-light mb-3"
     >
       <button
         class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
@@ -502,6 +528,71 @@
     </div>
   </div>
 </div>
+
+
+
+
+<!-- Invite More Friends (for existing capsule) -->
+<div
+  v-if="showInviteMoreModal"
+  class="modal-backdrop d-flex align-items-center justify-content-center"
+  @click.self="closeInviteModal"
+>
+  <div
+    class="modal-content p-4 rounded-3 shadow"
+    style="width: 400px; max-height: 500px; overflow-y: auto; background: white;"
+  >
+    <h5 class="fw-bold mb-3">Invite More Friends</h5>
+
+    <div v-if="friends.length">
+  <div
+    v-for="friend in friends"
+    :key="'invite-' + friend.id"
+    class="form-check mb-2 d-flex justify-content-between align-items-center"
+  >
+    <div>
+      <input
+        class="form-check-input me-2"
+        type="checkbox"
+        :id="'invite-more-' + friend.id"
+        :value="friend.id"
+        v-model="selectedInvitees"
+        :disabled="currentCapsule?.users.some(u => u.id === friend.id)"
+      />
+      <label class="form-check-label" :for="'invite-more-' + friend.id">
+        {{ friend.name }}
+        <small
+          v-if="currentCapsule?.users.some(u => u.id === friend.id)"
+          class="text-muted"
+        >
+          (Already invited)
+        </small>
+      </label>
+    </div>
+
+    <!-- ❌ Button aligned to the right -->
+    <button
+      v-if="currentCapsule?.users.some(u => u.id === friend.id)"
+      class="btn btn-sm btn-outline-danger ms-3"
+      @click="removeInvitation(friend.id)"
+      title="Remove invitation"
+    >
+      ✕
+    </button>
+  </div>
+</div>
+
+    <div v-else class="text-muted">No friends available.</div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button class="btn btn-outline-secondary btn-sm" @click="closeInviteModal">Cancel</button>
+      <button class="btn btn-success btn-sm fw-bold" @click="inviteMoreFriends">
+        Add Selected
+      </button>
+    </div>
+  </div>
+</div>
+
 
 
 
@@ -798,6 +889,76 @@ function toggleReady(capsule) {
     }
   )
 }
+
+
+const showInviteMoreModal = ref(false)
+const selectedInvitees = ref([])
+const currentCapsule = ref(null)
+
+const openInviteModal = (capsule) => {
+  currentCapsule.value = capsule
+  selectedInvitees.value = []
+  showInviteMoreModal.value = true
+}
+
+const closeInviteModal = () => {
+  showInviteMoreModal.value = false
+  currentCapsule.value = null
+}
+
+
+const inviteMoreFriends = () => {
+  if (!currentCapsule.value || selectedInvitees.value.length === 0) {
+    showToast('Select at least one friend to invite.', 'warning')
+    return
+  }
+
+  router.post(
+    route('capsules.inviteMore', currentCapsule.value.id),
+    { invited: selectedInvitees.value },
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        showToast('Friends invited successfully!', 'success')
+        closeInviteModal()
+      },
+      onError: () => showToast('Failed to invite friends.', 'danger'),
+    }
+  )
+}
+
+
+const removeInvitation = async (userId) => {
+    if (!currentCapsule.value) return;
+
+    router.delete(route('capsules.removeInvitation', { 
+        capsule: currentCapsule.value.id, 
+        user: userId 
+    }), {
+      preserveScroll: true,
+    preserveState: true,
+        onSuccess: () => {
+            currentCapsule.value.users = currentCapsule.value.users.filter(u => u.id !== userId);
+            showToast('Invitation removed successfully!', 'danger');
+        },
+        onError: () => {
+            showToast('Failed to remove invitation.', 'danger');
+        }
+    });
+};
+
+
+const updateVisibility = (capsule) => {
+  router.put(route('capsules.updateVisibility', capsule.id), {
+    visible_to: capsule.visible_to
+  }, {
+    preserveScroll: true,
+    onSuccess: () => showToast('Visibility updated successfully!', 'success'),
+    onError: () => showToast('Failed to update visibility.', 'danger'),
+  })
+}
+
+
 
 </script>
 

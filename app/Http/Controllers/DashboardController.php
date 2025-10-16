@@ -85,4 +85,11 @@ class DashboardController extends Controller
     // ✅ 4. Redirect or respond
     return Inertia::location(route('dashboard'));
     }
+
+    public function edit_profile(){
+        $user = Auth::user();
+        return Inertia::render('EditProfile', [
+            'user' => $user,
+        ]);
+    }
 }

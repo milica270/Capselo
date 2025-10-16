@@ -174,5 +174,61 @@ public function toggleReady(Capsule $capsule)
 }
 
 
+public function inviteMore(Request $request, Capsule $capsule)
+{
+    $request->validate([
+        'invited' => 'required|array',
+        'invited.*' => 'exists:users,id',
+    ]);
+
+    // Attach new users only if not already attached
+    $existing = $capsule->users()->pluck('users.id')->toArray();
+    $newInvites = array_diff($request->invited, $existing);
+
+    if (!empty($newInvites)) {
+        foreach ($newInvites as $userId) {
+            $capsule->users()->attach($userId, ['ready' => 0]);
+        }
+    }
+
+    return back()->with('success', 'Friends invited successfully!');
+}
+
+
+public function removeInvitation(Request $request, $capsuleId, $userId)
+{
+    $capsule = Capsule::findOrFail($capsuleId);
+
+    // Ensure only the owner can remove invitations
+    if ($capsule->owner_id !== Auth::id()) {
+        abort(403, 'Unauthorized');
+    }
+
+    $capsule->users()->detach($userId);
+
+    return back()->with('success', 'Invitation removed successfully!');
+
+}
+
+public function updateVisibility(Request $request, Capsule $capsule)
+{
+    // Check if the authenticated user is the owner
+    if ($capsule->owner_id !== auth()->id()) {
+        return back()->with('error', 'Not allowed');
+    }
+
+    // Validate the input
+    $data = $request->validate([
+        'visible_to' => 'required|in:me,friends,everyone',
+    ]);
+
+    // Update capsule
+    $capsule->visible_to = $data['visible_to'];
+    $capsule->save();
+
+    return back()->with('success', 'Visibility changed successfully!');
+}
+
+
 }
 
