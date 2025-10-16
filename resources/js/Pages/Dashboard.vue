@@ -451,9 +451,63 @@
         </div>
       </div>
 
-      <small class="text-muted fst-italic">
+
+<!-- Ready status + invited friends -->
+<div class="mt-3">
+  <div class="d-flex justify-content-between align-items-center">
+    <h6 class="fw-bold mb-2">Ready to publish?</h6>
+
+    <!-- ✅ Switch for invited user -->
+    <div class="form-check form-switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        :id="'readySwitchInvited-' + capsule.id"
+        :checked="isUserReady(capsule)"
+        @change="toggleReady(capsule)"
+      />
+      <label class="form-check-label fw-bold" :for="'readySwitchInvited-' + capsule.id">
+        I'm Ready to Publish
+      </label>
+    </div>
+  </div>
+
+  <!-- ✅ List of all invited friends -->
+  <ul class="list-unstyled mb-0">
+    <!-- Owner -->
+    <li class="d-flex align-items-center gap-2">
+      <i
+        class="bi"
+        :class="capsule.ready ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+      ></i>
+      <span class="fw-bold">{{ capsule.owner.name }} (Owner)</span>
+    </li>
+
+    <!-- Invited users -->
+    <li
+      v-for="friend in capsule.users"
+      :key="'invited-friend-' + friend.id"
+      class="d-flex align-items-center gap-2"
+    >
+      <i
+        class="bi"
+        :class="friend.pivot.ready ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+      ></i>
+      <span>{{ friend.name }}</span>
+    </li>
+  </ul>
+</div>
+
+<div class="small text-muted fst-italic ms-1 mt-2">
+  <i class="bi bi-info-circle me-1 text-dark"></i>
+  The capsule will be published automatically once <strong>all invited users mark themselves as ready</strong>.
+</div>
+
+
+
+      <div class="text-dark fst-italic fw-bold mt-2">
         Owner: {{ capsule.owner.name }} • Visibility: {{ capsule.visible_to }}
-      </small>
+      </div>
     </div>
   </div>
 
