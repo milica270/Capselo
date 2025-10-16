@@ -108,14 +108,14 @@
           <!-- See all -->
           <Link
             :href="route('friends')"
-            class="mt-2 text-decoration-none"
+            class="mt-0 text-decoration-none"
             style="font-size: 0.9rem"
           >
             See friends page
           </Link>
 
           <!-- Requests link -->
-          <div class="text-center">
+          <div class="text-center mt-4">
             <Link
               :href="route('friends')"
               class="text-decoration-none fw-bold"
@@ -237,11 +237,11 @@
 <div v-if="activeTab === 'drafts'" class="d-flex flex-column gap-3">
   <!-- Owned Capsules -->
   <div v-if="ownedCapsules.length">
-    <h6 class="fw-bold mb-2" style="color: black">Your Drafts</h6>
+    <h6 class="fw-bold mb-4" style="color: black">Your Drafts</h6>
     <div
       v-for="capsule in ownedCapsules"
       :key="'owned-' + capsule.id"
-      class="p-3 border rounded position-relative bg-light mb-3"
+      class="p-3 border rounded position-relative bg-light mb-4 mt-3"
     >
       <button
         class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
@@ -550,36 +550,39 @@
         {{ capsule.owner_id === user.id ? 'OWNER' : 'INVITED' }}
       </span>
 
-      <div class="d-flex gap-2">
-       <!-- Created date -->
-    <p class="text-muted small mb-2">{{ new Date(capsule.created_at).toLocaleString('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-      }) }}
-    </p>
+      <div class="d-flex gap-2 align-items-center">
+        <!-- Created date -->
+        <p class="text-muted small mb-0">
+          {{ new Date(capsule.created_at).toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          }) }}
+        </p>
 
+        <!-- Visibility badge (clickable) -->
+        <!-- Visibility badge (clickable only for owner) -->
+<span
+  class="fw-bold px-2 py-1 rounded text-white"
+  :class="{
+    'bg-danger': capsule.visible_to === 'me',
+    'bg-info': capsule.visible_to === 'friends',
+    'bg-warning text-dark': capsule.visible_to === 'everyone'
+  }"
+  style="cursor: pointer;"
+  @click="() => capsule.owner_id === user.id && openVisibilityModal(capsule)"
+  :title="capsule.owner_id === user.id ? 'Click to change visibility' : 'Only the owner can change visibility'"
+>
+  {{
+    capsule.visible_to === 'me'
+      ? 'Only Me'
+      : capsule.visible_to === 'friends'
+      ? 'Friends'
+      : 'Everyone'
+  }}
+</span>
 
-      <!-- Visibility -->
-      <span
-        class="fw-bold px-2 py-1 rounded text-white"
-        :class="{
-          'bg-danger': capsule.visible_to === 'me',
-          'bg-info': capsule.visible_to === 'friends',
-          'bg-warning text-dark': capsule.visible_to === 'everyone'
-        }"
-      >
-        {{
-          capsule.visible_to === 'me'
-            ? 'Only Me'
-            : capsule.visible_to === 'friends'
-            ? 'Friends'
-            : 'Everyone'
-        }}
-      </span>
+      </div>
     </div>
-    </div>
-
-   
 
     <!-- Description -->
     <p class="mb-2 fw-bold" style="white-space: pre-wrap;">
@@ -609,7 +612,6 @@
     <div>
       <strong>Shared with: </strong>
       <span v-if="capsule.owner_id === user.id">
-        <!-- Owner view: list invited friends -->
         <template v-if="capsule.users && capsule.users.length">
           <span
             v-for="(invited, idx) in capsule.users"
@@ -622,7 +624,6 @@
       </span>
 
       <span v-else>
-        <!-- Invited view: show owner + other invited users -->
         <span class="fw-bold">{{ capsule.owner?.name }}</span>
         <small class="text-muted">(owner)</small>
         <span v-if="capsule.users && capsule.users.length">
@@ -645,8 +646,6 @@
   >
     No archived capsules yet.
   </div>
-</div>
-
 
   </div>
 </div>
@@ -663,6 +662,48 @@
       <div class="col-md-1"></div>
     </div>
   </div>
+
+</div>
+
+<!-- Visibility Modal -->
+<div class="modal fade" id="visibilityModal" tabindex="-1" aria-labelledby="visibilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="visibilityModalLabel">Update Visibility</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="fw-bold mb-2">Who can see this capsule?</label>
+          <div class="d-flex flex-column gap-2">
+            <div v-for="option in visibilityOptions" :key="option.value" class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                :id="'visibility-' + option.value"
+                v-model="selectedVisibility"
+                :value="option.value"
+              />
+              <label class="form-check-label" :for="'visibility-' + option.value">
+                {{ option.label }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" @click="saveVisibility">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
   <!-- Invite Friends Modal -->
 <div
@@ -1124,6 +1165,47 @@ const updateVisibility = (capsule) => {
     preserveScroll: true,
     onSuccess: () => showToast('Visibility updated successfully!', 'success'),
     onError: () => showToast('Failed to update visibility.', 'danger'),
+  })
+}
+
+// --- Modal control ---
+const selectedCapsule = ref(null)
+const selectedVisibility = ref('me')
+
+const visibilityOptions = [
+  { value: 'me', label: 'Only Me' },
+  { value: 'friends', label: 'Friends' },
+  { value: 'everyone', label: 'Everyone' }
+]
+
+// --- Open modal ---
+const openVisibilityModal = (capsule) => {
+  selectedCapsule.value = capsule
+  selectedVisibility.value = capsule.visible_to
+
+  const modal = new bootstrap.Modal(document.getElementById('visibilityModal'))
+  modal.show()
+}
+
+// --- Save and call updateVisibility() ---
+const saveVisibility = () => {
+  if (!selectedCapsule.value) return
+
+  // Update local capsule
+  selectedCapsule.value.visible_to = selectedVisibility.value
+
+  // Call your Inertia route
+  router.put(route('capsules.updateVisibility', selectedCapsule.value.id), {
+    visible_to: selectedVisibility.value
+  }, {
+    preserveScroll: true,
+    onSuccess: () => {
+      showToast('Visibility updated successfully!', 'success')
+      bootstrap.Modal.getInstance(document.getElementById('visibilityModal')).hide()
+    },
+    onError: () => {
+      showToast('Failed to update visibility.', 'danger')
+    }
   })
 }
 
