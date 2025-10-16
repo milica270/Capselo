@@ -42,12 +42,38 @@ class DashboardController extends Controller
         }, 'images', 'owner'])
         ->get();
 
+
+        // --- OWNED READY CAPSULES (everyone ready) ---
+    $ownedReadyCapsules = Capsule::where('capsules.owner_id', $user->id)
+        ->where('capsules.ready', 1)
+        ->whereDoesntHave('users', function ($q) {
+            $q->where('capsule_user.ready', 0);
+        })
+        ->with(['users' => function ($q) {
+            $q->withPivot('ready');
+        }, 'images', 'owner'])
+        ->get();
+
+    // --- INVITED READY CAPSULES (everyone ready) ---
+    $invitedReadyCapsules = $user->invitedCapsules()
+        ->where('capsules.ready', 1)
+        ->whereDoesntHave('users', function ($q) {
+            $q->where('capsule_user.ready', 0);
+        })
+        ->with(['users' => function ($q) {
+            $q->withPivot('ready');
+        }, 'images', 'owner'])
+        ->get();
+
+
     return Inertia::render('Dashboard', [
         'user' => $user,
         'users' => User::all(),
         'friendships' => Friendship::all(),
         'ownedCapsules' => $ownedDrafts,
         'invitedCapsules' => $invitedDrafts,
+        'ownedReadyCapsules' => $ownedReadyCapsules,
+        'invitedReadyCapsules' => $invitedReadyCapsules,
         
     ]);
 }

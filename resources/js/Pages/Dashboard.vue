@@ -75,7 +75,7 @@
     <div class="row mt-3">
       <div class="col-md-1"></div>
       <div class="col-md-3">
-        <div class="d-flex flex-column p-3 bg-white rounded h-100 shadow-sm">
+        <div class="d-flex flex-column p-3 bg-white rounded shadow-sm">
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="mb-0 text-uppercase" style="color: var(--lightGrey)">Friends</h6>
@@ -180,7 +180,7 @@
   </div>
 
   <div class="d-flex flex-wrap gap-2 mb-2">
-    <button type="button" class="btn btn-outline-primary btn-sm fw-bold" @click="addCustomHashtag">+ Add</button>
+    <button type="button" class="btn btn-outline-primary btn-sm fw-bold" @click="addCustomHashtag">+ Custom</button>
     <button type="button" class="btn btn-outline-danger btn-sm fw-bold" @click="removeLastHashtag" :disabled="!capsule.hashtags.length">− Remove</button>
   </div>
 
@@ -530,11 +530,124 @@
 
 
 
-    <div v-else>
-      <p class="text-muted">Content for {{ activeTab }} will appear here.</p>
-      
-      
+<!-- Archive Tab -->
+<div v-if="activeTab === 'archive'" class="d-flex flex-column gap-3">
+  <h6 class="fw-bold mb-3" style="color: black">Archive</h6>
+
+  <!-- Combine owned and invited ready capsules -->
+  <div
+    v-for="capsule in [...ownedReadyCapsules, ...invitedReadyCapsules]"
+    :key="'archive-' + capsule.id"
+    class="p-3 border rounded position-relative bg-light mb-3 shadow-sm"
+  >
+    <!-- Top labels -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <!-- Owner / Invited -->
+      <span
+        class="fw-bold px-2 py-1 rounded"
+        style="color: var(--darkGrey)"
+      >
+        {{ capsule.owner_id === user.id ? 'OWNER' : 'INVITED' }}
+      </span>
+
+      <div class="d-flex gap-2">
+       <!-- Created date -->
+    <p class="text-muted small mb-2">{{ new Date(capsule.created_at).toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }) }}
+    </p>
+
+
+      <!-- Visibility -->
+      <span
+        class="fw-bold px-2 py-1 rounded text-white"
+        :class="{
+          'bg-danger': capsule.visible_to === 'me',
+          'bg-info': capsule.visible_to === 'friends',
+          'bg-warning text-dark': capsule.visible_to === 'everyone'
+        }"
+      >
+        {{
+          capsule.visible_to === 'me'
+            ? 'Only Me'
+            : capsule.visible_to === 'friends'
+            ? 'Friends'
+            : 'Everyone'
+        }}
+      </span>
     </div>
+    </div>
+
+   
+
+    <!-- Description -->
+    <p class="mb-2 fw-bold" style="white-space: pre-wrap;">
+      {{ capsule.description }}
+    </p>
+
+    <!-- Images -->
+    <div
+      v-if="capsule.images && capsule.images.length"
+      class="d-flex flex-wrap gap-2 mb-2"
+    >
+      <img
+        v-for="image in capsule.images"
+        :key="'img-' + image.id"
+        :src="`/storage/${image.image_path}`"
+        class="rounded"
+        width="100"
+        height="100"
+        style="object-fit: cover;"
+      />
+    </div>
+    <div v-else class="text-muted fst-italic mb-2">
+      No images available.
+    </div>
+
+    <!-- Shared with section -->
+    <div>
+      <strong>Shared with: </strong>
+      <span v-if="capsule.owner_id === user.id">
+        <!-- Owner view: list invited friends -->
+        <template v-if="capsule.users && capsule.users.length">
+          <span
+            v-for="(invited, idx) in capsule.users"
+            :key="'invited-' + invited.id"
+          >
+            {{ invited.name }}<span v-if="idx !== capsule.users.length - 1">, </span>
+          </span>
+        </template>
+        <span v-else class="text-muted fst-italic">No invited users</span>
+      </span>
+
+      <span v-else>
+        <!-- Invited view: show owner + other invited users -->
+        <span class="fw-bold">{{ capsule.owner?.name }}</span>
+        <small class="text-muted">(owner)</small>
+        <span v-if="capsule.users && capsule.users.length">
+          , 
+          <span
+            v-for="(friend, idx) in capsule.users.filter(u => u.id !== user.id)"
+            :key="'friend-' + friend.id"
+          >
+            {{ friend.name }}<span v-if="idx !== capsule.users.filter(u => u.id !== user.id).length - 1">, </span>
+          </span>
+        </span>
+      </span>
+    </div>
+  </div>
+
+  <!-- No capsules message -->
+  <div
+    v-if="[...ownedReadyCapsules, ...invitedReadyCapsules].length === 0"
+    class="text-muted text-center"
+  >
+    No archived capsules yet.
+  </div>
+</div>
+
+
   </div>
 </div>
 
@@ -730,6 +843,8 @@ const props = defineProps({
   friendships: Array,
   ownedCapsules: Array,
   invitedCapsules: Array,
+  ownedReadyCapsules: Array,
+  invitedReadyCapsules: Array,
 })
 
 const authUserId = usePage().props.auth.user.id
