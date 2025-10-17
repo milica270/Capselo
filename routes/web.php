@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FriendshipController;
 use App\Http\Controllers\CapsuleController;
+use App\Http\Controllers\FeedController;
 use App\Models\Friendship;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
@@ -59,9 +60,10 @@ Route::get('/dashboard/edit_profile', [DashboardController::class, 'edit_profile
 
 Route::put('/user/update', [DashboardController::class, 'update_user'])->name('users.update');
 
-Route::get('/feed', function () {
-    return Inertia::render('Feed');
-})->name('feed');
+
+
+Route::get('/feed', [FeedController::class, 'feed'])->name('feed');
+
 
 Route::get('/premium', function () {
     return Inertia::render('Premium');

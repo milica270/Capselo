@@ -1,5 +1,7 @@
 <template>
-    <div>feed</div>
+    <Head>
+    <title>Feed</title>
+  </Head>
 </template>
 <script setup>
 

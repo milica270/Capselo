@@ -34,4 +34,17 @@ class Capsule extends Model
     {
         return $this->hasMany(CapsuleImage::class);
     }
+
+     public function is_ready(): bool
+    {
+        if ($this->ready != 1) {
+            return false;
+        }
+
+        // Check if all invited users are ready
+        $notReadyFriends = $this->users()->wherePivot('ready', '!=', 1)->exists();
+
+        // Capsule is ready only if all are ready
+        return !$notReadyFriends;
+    }
 }
