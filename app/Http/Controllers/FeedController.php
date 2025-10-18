@@ -16,6 +16,7 @@ class FeedController extends Controller
     public function feed()
     {
         $user = Auth::user();
+        auth()->user()->calculateStreak();
 
        $friendIds = Friendship::where(function ($q) use ($user) {
         $q->where('user_id', $user->id)

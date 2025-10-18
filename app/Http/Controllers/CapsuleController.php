@@ -45,6 +45,7 @@ class CapsuleController extends Controller
                 ]);
             }
         }
+        auth()->user()->calculateStreak();
 
         return back()->with('success', 'Capsule created successfully!');
     }
