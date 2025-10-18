@@ -551,13 +551,7 @@
       </span>
 
       <div class="d-flex gap-2 align-items-center">
-        <!-- Created date -->
-        <p class="text-muted small mb-0">
-          {{ new Date(capsule.created_at).toLocaleString('en-US', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-          }) }}
-        </p>
+        
 
         <!-- Visibility badge (clickable) -->
         <!-- Visibility badge (clickable only for owner) -->
@@ -637,6 +631,15 @@
         </span>
       </span>
     </div>
+
+
+    <!-- Created date -->
+<div class="d-flex justify-content-end">
+  <p class="text-muted small mb-0">
+    {{ new Date(capsule.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) }}
+  </p>
+</div>
+
   </div>
 
   <!-- No capsules message -->

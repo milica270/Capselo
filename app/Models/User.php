@@ -87,6 +87,41 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 
+    public function calculateStreak()
+    {
+        $today = now()->startOfDay();
+        $streak = 0;
+
+        // Loop backward day by day
+        for ($i = 0; $i < 100; $i++) { // reasonable limit, e.g. 100 days max
+            $date = $today->copy()->subDays($i);
+
+            // Get capsules published that day (ready + user is owner or invited)
+            $hasCapsule = Capsule::whereDate('created_at', $date)
+                ->where(function ($query) {
+                    $query->where('owner_id', auth()->id())
+                        ->orWhereHas('users', function ($sub) {
+                            $sub->where('users.id', auth()->id());
+                        });
+                })
+                ->get()
+                ->filter(fn ($capsule) => $capsule->is_ready())
+                ->isNotEmpty();
+
+            if ($hasCapsule) {
+                $streak++;
+            } else {
+                break; // stop streak when a day without capsule is found
+            }
+        }
+
+        // Save to DB
+        $this->update(['streak_days' => $streak]);
+
+        return $streak;
+    }
+
+
     
 }
 
