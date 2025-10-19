@@ -42,8 +42,7 @@ class FeedController extends Controller
         ->where(function ($query) use ($user, $friendIds) {
             $query
                 ->where(function ($q) use ($user) {
-                    $q->where('visible_to', 'me')
-                      ->where('owner_id', $user->id);
+                    $q->where('owner_id', $user->id);
                 })
                 ->orWhere(function ($q) use ($friendIds) {
                     $q->where('visible_to', 'friends')
