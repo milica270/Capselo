@@ -557,7 +557,7 @@
 
 <!-- Archive Tab -->
 <div v-if="activeTab === 'archive'" class="d-flex flex-column gap-3">
-  <h6 class="fw-bold mb-3" style="color: black">Archive</h6>
+  <h6 v-if="[...ownedReadyCapsules, ...invitedReadyCapsules].length > 0" class="fw-bold mb-3" style="color: black">Archive</h6>
 
   <!-- Combine owned and invited ready capsules -->
   <div
@@ -670,7 +670,7 @@
   <!-- No capsules message -->
   <div
     v-if="[...ownedReadyCapsules, ...invitedReadyCapsules].length === 0"
-    class="text-muted text-center"
+    class="text-muted"
   >
     No archived capsules yet.
   </div>

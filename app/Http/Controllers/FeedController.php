@@ -14,18 +14,20 @@ use Illuminate\Support\Facades\DB;
 class FeedController extends Controller
 {
     public function feed()
-    {
-        $user = Auth::user();
-        auth()->user()->calculateStreak();
+{
+    $user = Auth::user();
 
-       $friendIds = Friendship::where(function ($q) use ($user) {
+    // Update streak
+    $user->calculateStreak();
+
+    // Get IDs of accepted friends
+    $friendIds = Friendship::where(function ($q) use ($user) {
         $q->where('user_id', $user->id)
           ->orWhere('friend_id', $user->id);
     })
-    ->where('accepted', 1) // ✅ only accepted friendships
+    ->where('accepted', 1)
     ->get(['user_id', 'friend_id'])
     ->flatMap(function ($friendship) use ($user) {
-        // Return the ID of the other user in each friendship
         return [
             $friendship->user_id == $user->id
                 ? $friendship->friend_id
@@ -34,27 +36,33 @@ class FeedController extends Controller
     })
     ->unique()
     ->values();
-        // 2️⃣ Get all capsules where:
-        //   - Owner is a friend OR
-        //   - Friend is in capsule_user
-        //   - AND visible_to = 'friends' or 'everyone'
-        $capsules = Capsule::whereIn('visible_to', ['friends', 'everyone'])
-            ->where(function ($query) use ($friendIds) {
-                $query->whereIn('owner_id', $friendIds)
-                      ->orWhereHas('users', function ($sub) use ($friendIds) {
-                          $sub->whereIn('users.id', $friendIds);
-                      });
-            })
-            ->with(['owner', 'users', 'images'])
-            ->orderByDesc('created_at')
-            ->get()
-            ->filter(fn ($capsule) => $capsule->is_ready())
-            ->values(); 
 
-        return Inertia::render('Feed', [
-            'user' => $user,
-            'friends' => $friendIds,
-            'capsules' => $capsules,
-        ]);
-    }
+    // Get capsules according to visibility rules
+    $capsules = Capsule::with(['owner', 'users', 'images'])
+        ->where(function ($query) use ($user, $friendIds) {
+            $query
+                ->where(function ($q) use ($user) {
+                    $q->where('visible_to', 'me')
+                      ->where('owner_id', $user->id);
+                })
+                ->orWhere(function ($q) use ($friendIds) {
+                    $q->where('visible_to', 'friends')
+                      ->whereIn('owner_id', $friendIds);
+                })
+                ->orWhere(function ($q) {
+                    $q->where('visible_to', 'everyone');
+                });
+        })
+        ->orderByDesc('created_at')
+        ->get()
+        ->filter(fn ($capsule) => $capsule->is_ready())
+        ->values();
+
+    return Inertia::render('Feed', [
+        'user' => $user,
+        'friends' => $friendIds,
+        'capsules' => $capsules,
+    ]);
+}
+
 }
