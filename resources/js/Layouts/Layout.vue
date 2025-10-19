@@ -81,8 +81,11 @@
                 </div>
               </div>
               <hr>
-              <Link :href="route('logout')" method="post" class="btn btn-danger btn-sm fw-bold w-100">
+              <Link :href="route('logout')" method="post" class="btn btn-sm fw-bold w-100" style="background-color: white; color: var(--bs-danger); border: 2px solid var(--bs-danger);">
                 <i class="bi bi-box-arrow-right"></i> Logout
+              </Link>
+              <Link  :href="route('account.delete')" method="delete" class="btn btn-danger btn-sm fw-bold w-100 mt-2">
+                <i class="bi bi-trash"></i> Delete account
               </Link>
             </div>
           </div>

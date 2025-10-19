@@ -62,8 +62,33 @@
             <div v-else>
               <span>{{ user.jobType }}</span>
             </div>
+          
           </div>
+          
+          <div class="d-lg-none">
+            <hr class="my-1">
+          <div class="d-flex justify-content-center gap-4 mt-3 mb-4">
+            <div>
+            <i class="bi bi-bell-fill fs-4"></i>
+            <span>{{user.notifications}}</span>
+            </div>
+            <div>
+              <i class="bi bi-fire fs-4"></i>
+            <span>{{user.streak_days}}</span>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+          <Link :href="route('logout')" method="post" class="btn btn-sm fw-bold w-100" style="background-color: white; color: var(--bs-danger); border: 2px solid var(--bs-danger);">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </Link>
+              <Link  :href="route('account.delete')" method="delete" class="btn btn-danger btn-sm fw-bold w-100">
+                <i class="bi bi-trash"></i> Delete account
+              </Link>
+            </div>
+          </div>
+
         </div>
+        
       </div>
 
       <div class="col-md-3"></div>
@@ -150,8 +175,8 @@
     :class="{'btn-success fw-bold': activeTab === 'drafts', 'btn-outline-success': activeTab !== 'drafts'}"
     @click="activeTab = 'drafts'"
   >
-  <i class="bi bi-file-earmark-text fs-5"></i>
-  <span>Drafts</span>
+  <i class="bi bi-hourglass-split"></i>
+  <span>Waiting</span>
   </button>
   <button
     class="btn btn-sm d-flex align-items-center gap-1"
@@ -159,7 +184,7 @@
     @click="activeTab = 'archive'"
   >
   <i class="bi bi-archive fs-5"></i>
-  <span>Archive</span>
+  <span>Published</span>
   </button>
 </div>
 
