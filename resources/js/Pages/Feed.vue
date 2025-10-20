@@ -81,17 +81,17 @@
             class="d-flex flex-wrap justify-content-start gap-2 mb-2"
           >
             <img
-              v-for="(image, i) in capsule.images.slice(0,4)"
-              :key="image.id"
-              :src="`/storage/${image.image_path}`"
-              alt="capsule image"
-              class="rounded feed-image"
-              width="100"
-              height="100"
-              style="object-fit: cover; cursor: pointer; transition: transform 0.2s;"
-              @mouseover="e => e.target.style.transform = 'scale(1.04)'"
-              @mouseleave="e => e.target.style.transform = 'scale(1)'"
-            />
+  v-for="(image, i) in capsule.images.slice(0, isMobile ? 4 : 5)"
+  :key="image.id"
+  :src="`/storage/${image.image_path}`"
+  alt="capsule image"
+  class="rounded feed-image"
+  width="100"
+  height="100"
+  style="object-fit: cover; cursor: pointer; transition: transform 0.2s;"
+  @mouseover="e => e.target.style.transform = 'scale(1.04)'"
+  @mouseleave="e => e.target.style.transform = 'scale(1)'"
+/>
           </div>
 
           <!-- Show full capsule button -->
@@ -179,12 +179,27 @@
 
 <script setup>
 import { Head } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   user: Object,
   friends: Array,
   capsules: Array,
+})
+
+const isMobile = ref(false)
+
+const checkScreen = () => {
+  isMobile.value = window.innerWidth <= 768 // adjust breakpoint if needed
+}
+
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreen)
 })
 
 const modalCapsule = ref(null)
