@@ -45,7 +45,7 @@
 
         <!-- Capsules -->
         <div
-          v-for="capsule in capsules"
+          v-for="capsule in filteredCapsules"
           :key="capsule.id"
           class="p-3 border cp position-relative bg-white mb-4 shadow-sm"
         >
