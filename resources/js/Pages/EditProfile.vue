@@ -9,7 +9,7 @@
 
       <!-- Form Column -->
       <div class="col-md-3">
-        <form @submit.prevent="submit" class="d-flex flex-column gap-3 p-3 bg-white rounded shadow-sm">
+        <form @submit.prevent="submit" enctype="multipart/form-data" class="d-flex flex-column gap-3 p-3 bg-white rounded shadow-sm">
           
           <!-- Avatar Preview + Upload -->
           
@@ -176,13 +176,18 @@ const form = useForm({
   role: props.user.role,
   schoolType: props.user.schoolType,
   jobType: props.user.jobType,
-  avatar: props.user.avatar,
+  avatar: null,
   preview: null
 })
 
 const submit = () => {
-  form.put(route('users.update', props.user.id));
-}
+  form.post(route('users.update'), {
+    forceFormData: true,
+    data: { _method: 'put' },
+    onSuccess: () => form.reset('avatar', 'preview'),
+  });
+};
+
 
 // Handle avatar preview
 const handleAvatarChange = (e) => {

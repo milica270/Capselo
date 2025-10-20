@@ -81,6 +81,7 @@ class DashboardController extends Controller
 
 
     public function update_user(Request $request) {
+        
         $user = Auth::user(); // or User::find($id) if updating another user
 
     

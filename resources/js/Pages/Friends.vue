@@ -297,7 +297,13 @@ const generateRecommended = () => {
   const friendsOfFriendsIds = new Set()
 
   props.friendships.forEach(f => {
-    if (f.accepted !== 1) return
+    // Skip any relation that involves the auth user (since we only care about friends’ friends)
+    if (f.user_id === authUserId || f.friend_id === authUserId) return
+
+    // Skip all friendships that are already accepted or pending (i.e., any existing relation)
+    if (f.accepted === 1 || f.accepted === 0) return
+
+    // Identify friends-of-friends
     let friendId = null
     if (friendsIds.includes(f.user_id)) friendId = f.friend_id
     else if (friendsIds.includes(f.friend_id)) friendId = f.user_id
@@ -311,14 +317,27 @@ const generateRecommended = () => {
     .map(id => props.users.find(u => u.id === id))
     .filter(Boolean)
 
+  // 🩵 Filter out users who already have a friendship (even if request pending)
+  recommendedUsers = recommendedUsers.filter(u => {
+    return !props.friendships.some(f =>
+      (f.user_id === authUserId && f.friend_id === u.id) ||
+      (f.friend_id === authUserId && f.user_id === u.id)
+    )
+  })
+
   if (recommendedUsers.length === 0) {
     const potentialUsers = props.users.filter(
-      u => u.id !== authUserId && !friendsIds.includes(u.id)
+      u =>
+        u.id !== authUserId &&
+        !friendsIds.includes(u.id) &&
+        !props.friendships.some(f =>
+          (f.user_id === authUserId && f.friend_id === u.id) ||
+          (f.friend_id === authUserId && f.user_id === u.id)
+        )
     )
     recommendedUsers = shuffleArray(potentialUsers).slice(0, 3)
   }
 
-  // initialize requestSent false
   recommended.value = recommendedUsers.slice(0, 3).map(u => ({ ...u, requestSent: false }))
 }
 

@@ -18,7 +18,6 @@ class CapsuleController extends Controller
             'description' => 'required|string',
             'published' => 'boolean',
             'invited' => 'array',
-            'images.*' => 'image|max:2048',
             'visible_to' => 'required',
         ]);
 

@@ -58,7 +58,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 Route::get('/dashboard/edit_profile', [DashboardController::class, 'edit_profile'])->name('edit_profile');
 
-Route::put('/user/update', [DashboardController::class, 'update_user'])->name('users.update');
+Route::post('/user/update', [DashboardController::class, 'update_user'])->name('users.update');
 
 
 
