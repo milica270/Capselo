@@ -6,7 +6,47 @@
   <div class="container-fluid bg-light py-4 min-vh-100">
     <div class="row mt-3">
       <div class="col-md-1"></div>
-      <div class="col-md-4"></div>
+      
+
+
+<div class="col-md-4 mb-4">
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <h4 class="fw-bold mb-4 text-success text-start">
+      {{ currentMonthName }} {{ currentYear }}
+    </h4>
+
+    <!-- Weekday headers -->
+    <div class="d-grid text-center fw-semibold mb-2 text-success small"
+         :style="{ gridTemplateColumns: 'repeat(7, 1fr)' }">
+      <div v-for="day in weekDays" :key="day">{{ day }}</div>
+    </div>
+
+    <!-- Days grid -->
+    <div class="d-grid calendar-grid">
+      <div
+        v-for="day in daysInMonth"
+        :key="day"
+        class="calendar-day d-flex justify-content-center align-items-center position-relative"
+        :class="{
+          'today': day === today,
+        }"
+      >
+        <span>{{ day }}</span>
+
+        <!-- Dot for today -->
+        <div
+          v-if="day === today"
+          class="today-dot bg-warning rounded-circle position-absolute"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
       <div class="col-md-6">
 
 
@@ -205,6 +245,8 @@ onUnmounted(() => {
 const modalCapsule = ref(null)
 const selectedVisibility = ref('all')
 const searchQuery = ref('')
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
 
 // 🔹 Filtered capsules logic
 const filteredCapsules = computed(() => {
@@ -237,6 +279,22 @@ const closeModal = () => {
   modalCapsule.value = null
   document.body.style.overflow = ''
 }
+
+
+const today = new Date().getDate()
+const currentMonth = new Date().getMonth()
+const currentYear = new Date().getFullYear()
+
+const currentMonthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
+  new Date(currentYear, currentMonth)
+)
+
+// number of days in this month
+const daysInMonth = Array.from(
+  { length: new Date(currentYear, currentMonth + 1, 0).getDate() },
+  (_, i) => i + 1
+)
+
 </script>
 
 
@@ -302,4 +360,41 @@ const closeModal = () => {
 .capsule-title .dot {
   color: var(--bs-success); /* make the dot green */
 }
+
+
+/* 🗓️ Calendar styling */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #343a40;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  cursor: default;
+}
+
+.calendar-day.today {
+  background-color: #fff3cd !important;
+  border-color: #ffc107 !important;
+  color: #212529;
+  font-weight: 700;
+  position: relative;
+}
+
+.today-dot {
+  width: 5px;
+  height: 5px;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
 </style>
