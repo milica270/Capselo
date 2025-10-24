@@ -122,6 +122,30 @@ Route::get('/user/streak', function () {
     return response()->json(['streak' => $streak]);
 })->name('user.streak');
 
+
+
+Route::get('/calendar-status', function () {
+    $user = auth()->user();
+
+    $capsules = $user->ownedCapsules()
+        ->whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->get();
+
+    $days = [];
+
+    foreach (range(1, now()->daysInMonth) as $day) {
+        $hasPublished = $capsules->contains(function ($capsule) use ($day) {
+            return $capsule->is_ready() && $capsule->created_at->day == $day;
+        });
+
+        $days[$day] = $hasPublished; // true if published, false otherwise
+    }
+
+    return response()->json($days);
+})->middleware('auth');
+
+
 });
 
 Route::delete('/account/delete', [AuthController::class, 'delete_user'])->middleware('auth')->name('account.delete');

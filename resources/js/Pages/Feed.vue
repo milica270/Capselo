@@ -11,9 +11,9 @@
 
 <div class="col-md-4 mb-4">
   <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-    <h4 class="fw-bold mb-4 text-success text-start">
+    <h3 class="fw-bold mb-4 text-success text-start">
       {{ currentMonthName }} {{ currentYear }}
-    </h4>
+    </h3>
 
     <!-- Weekday headers -->
     <div class="d-grid text-center fw-semibold mb-2 text-success small"
@@ -23,22 +23,24 @@
 
     <!-- Days grid -->
     <div class="d-grid calendar-grid">
-      <div
-        v-for="day in daysInMonth"
-        :key="day"
-        class="calendar-day d-flex justify-content-center align-items-center position-relative"
-        :class="{
-          'today': day === today,
-        }"
-      >
-        <span>{{ day }}</span>
+<div
+  v-for="day in daysInMonth"
+  :key="day"
+  class="calendar-day d-flex justify-content-center align-items-center position-relative"
+  :class="{
+    'today': day === today,
+    'published': dayStatus[day] === true && day < today,
+    'unpublished': dayStatus[day] === false && day < today
+  }"
+>
+  <span>{{ day }}</span>
 
-        <!-- Dot for today -->
-        <div
-          v-if="day === today"
-          class="today-dot bg-warning rounded-circle position-absolute"
-        ></div>
-      </div>
+  <div
+    v-if="day === today"
+    class="today-dot bg-warning rounded-circle position-absolute"
+  ></div>
+</div>
+
     </div>
   </div>
 </div>
@@ -220,6 +222,13 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
+
+
+
+
+const dayStatus = ref({}) // { 1: true, 2: false, ... }
+
 
 const props = defineProps({
   user: Object,
@@ -233,10 +242,18 @@ const checkScreen = () => {
   isMobile.value = window.innerWidth <= 768 // adjust breakpoint if needed
 }
 
-onMounted(() => {
+onMounted(async () => {
   checkScreen()
   window.addEventListener('resize', checkScreen)
+
+  try {
+    const response = await axios.get('/calendar-status')
+    dayStatus.value = response.data
+  } catch (error) {
+    console.error('Error loading calendar data:', error)
+  }
 })
+
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreen)
@@ -246,6 +263,8 @@ const modalCapsule = ref(null)
 const selectedVisibility = ref('all')
 const searchQuery = ref('')
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const now = new Date();
+
 
 
 // 🔹 Filtered capsules logic
@@ -395,6 +414,39 @@ const daysInMonth = Array.from(
   left: 50%;
   transform: translateX(-50%);
 }
+
+
+.calendar-day.published span {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--bs-primary);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.calendar-day.unpublished span {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: lightcoral;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.calendar-day.today span {
+  background-color: #fff3cd;
+  color: #212529;
+}
+
 
 
 </style>
