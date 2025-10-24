@@ -17,8 +17,7 @@ class FeedController extends Controller
 {
     $user = Auth::user();
 
-    // Update streak
-    $user->calculateStreak();
+
 
     // Get IDs of accepted friends
     $friendIds = Friendship::where(function ($q) use ($user) {

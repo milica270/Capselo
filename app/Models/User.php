@@ -87,40 +87,39 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 
-    public function calculateStreak()
-    {
-        $today = now()->startOfDay();
-        $streak = 0;
 
-        // Loop backward day by day
-        for ($i = 0; $i < 100; $i++) { // reasonable limit, e.g. 100 days max
-            $date = $today->copy()->subDays($i);
 
-            // Get capsules published that day (ready + user is owner or invited)
-            $hasCapsule = Capsule::whereDate('created_at', $date)
-                ->where(function ($query) {
-                    $query->where('owner_id', auth()->id())
-                        ->orWhereHas('users', function ($sub) {
-                            $sub->where('users.id', auth()->id());
-                        });
-                })
-                ->get()
-                ->filter(fn ($capsule) => $capsule->is_ready())
-                ->isNotEmpty();
+    // In User.php (User model)
 
-            if ($hasCapsule) {
-                $streak++;
-            } else {
-                break; // stop streak when a day without capsule is found
-            }
+public function streak()
+{
+    // Get all capsules of the user, ordered by date descending (latest first)
+    $capsules = $this->ownedCapsules()
+        ->whereDate('created_at', '<=', now()) // only up to today
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    $streak = 0;
+
+    // Start from today, check each day backward
+    $currentDate = now()->startOfDay();
+
+    while (true) {
+        // Check if there is at least one published capsule on this day
+        $hasPublished = $capsules->contains(function ($capsule) use ($currentDate) {
+            return $capsule->is_ready() && $capsule->created_at->isSameDay($currentDate);
+        });
+
+        if ($hasPublished) {
+            $streak++;
+            $currentDate->subDay(); // go to previous day
+        } else {
+            break; // streak broken
         }
-
-        // Save to DB
-        $this->update(['streak_days' => $streak]);
-
-        return $streak;
     }
 
+    return $streak;
+}
 
     
 }

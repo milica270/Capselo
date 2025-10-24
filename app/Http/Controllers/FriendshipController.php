@@ -13,7 +13,6 @@ class FriendshipController extends Controller
 {
 
     public function show() {
-        auth()->user()->calculateStreak();
         return Inertia::render('Friends', [
         'users' => User::all(),
         'friendships' => Friendship::all(),

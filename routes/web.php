@@ -106,6 +106,22 @@ Route::delete('/capsules/{capsule}/remove-invitation/{user}', [CapsuleController
 Route::put('/capsules/{capsule}/visibility', [CapsuleController::class, 'updateVisibility'])
     ->name('capsules.updateVisibility');
 
+
+
+Route::get('/user/streak', function () {
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json(['error' => 'Not authenticated'], 401);
+    }
+
+    $streak = $user->streak();
+
+    // ✅ also update in DB
+    $user->update(['streak_days' => $streak]);
+
+    return response()->json(['streak' => $streak]);
+})->name('user.streak');
+
 });
 
 Route::delete('/account/delete', [AuthController::class, 'delete_user'])->middleware('auth')->name('account.delete');

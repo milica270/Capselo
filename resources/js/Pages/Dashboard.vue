@@ -81,9 +81,14 @@
           <Link :href="route('logout')" method="post" class="btn btn-sm fw-bold w-100" style="background-color: white; color: var(--bs-danger); border: 2px solid var(--bs-danger);">
                 <i class="bi bi-box-arrow-right"></i> Logout
               </Link>
-              <Link  :href="route('account.delete')" method="delete" class="btn btn-danger btn-sm fw-bold w-100">
-                <i class="bi bi-trash"></i> Delete account
-              </Link>
+              <Link 
+              href="#" 
+              class="btn btn-danger btn-sm fw-bold w-100"
+              @click.prevent="confirmDelete"
+            >
+              <i class="bi bi-trash"></i> Delete account
+            </Link>
+
             </div>
           </div>
 
@@ -171,13 +176,23 @@
     <span>New Capsule</span>
   </button>
   <button
-    class="btn btn-sm d-flex align-items-center gap-1"
-    :class="{'btn-success fw-bold': activeTab === 'drafts', 'btn-outline-success': activeTab !== 'drafts'}"
-    @click="activeTab = 'drafts'"
-  >
+  class="btn btn-sm d-flex align-items-center gap-1 position-relative"
+  :class="{'btn-success fw-bold': activeTab === 'drafts', 'btn-outline-success': activeTab !== 'drafts'}"
+  @click="activeTab = 'drafts'"
+>
   <i class="bi bi-hourglass-split"></i>
   <span>Waiting</span>
-  </button>
+
+  <!-- Notification badge -->
+  <span
+    v-if="ownedCapsules.length + invitedCapsules.length > 0"
+    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark"
+    style="font-size: 0.65rem;"
+  >
+    {{ ownedCapsules.length + invitedCapsules.length}}
+  </span>
+</button>
+
   <button
     class="btn btn-sm d-flex align-items-center gap-1"
     :class="{'btn-success fw-bold': activeTab === 'archive', 'btn-outline-success': activeTab !== 'archive'}"
@@ -843,6 +858,12 @@ import { usePage, router } from '@inertiajs/vue3'
 import hashtagsData from '../data/hashtags.json'
 import { showToast } from '../utils/toast.js'
 
+
+const confirmDelete = () => {
+  if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    router.delete(route('account.delete'))
+  }
+}
 
 const availableHashtags = ref(hashtagsData)
 

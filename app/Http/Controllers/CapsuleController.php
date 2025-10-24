@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Capsule;
 use App\Models\CapsuleImage;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,14 @@ class CapsuleController extends Controller
                 ]);
             }
         }
-        auth()->user()->calculateStreak();
+
+        $user = Auth::user();
+
+        if ($capsule->is_ready()) {
+        $newStreak = $user->streak();
+
+        $user->update(['streak_days' => $newStreak]);
+    }
 
         return back()->with('success', 'Capsule created successfully!');
     }

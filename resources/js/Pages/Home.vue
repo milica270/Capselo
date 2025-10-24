@@ -40,9 +40,8 @@
             <div class="mb-3">
               <label for="password" class="form-label fw-bold">Password</label>
               <input type="password" v-model="form.password" class="form-control" id="password" placeholder="Password" />
-              <div v-if="form.errors.password" class="text-danger small mt-1">
-                {{ form.errors.password }}
-              </div>
+              
+              
             </div>
             <button type="submit" class="btn btn-success w-100" :disabled="form.processing">Login</button>
           </form>
@@ -94,9 +93,22 @@ const authUser = page.props.auth?.user
 
 const submit = () => {
   form.post(route('authenticate'), {
-    onError: () => form.reset('password', 'remember'),
+    onError: (errors) => {
+      // Reset sensitive fields
+      form.reset('password', 'remember')
+
+      // Alert the user about the error
+      if (errors) {
+        const messages = Object.values(errors).flat().join('\n')
+        alert(messages)
+      } else {
+        alert("There was an error. Please try again.")
+      }
+    },
   })
 }
+
+
 </script>
 
 

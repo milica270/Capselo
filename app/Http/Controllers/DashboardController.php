@@ -16,7 +16,6 @@ class DashboardController extends Controller
   public function dashboard()
 {
     $user = Auth::user();
-    auth()->user()->calculateStreak();
 
     $ownedDrafts = Capsule::where('capsules.owner_id', $user->id)
         ->where(function ($q) {

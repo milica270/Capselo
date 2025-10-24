@@ -48,7 +48,7 @@
 
           <div class="d-flex align-items-center gap-1">
             <i class="bi bi-fire fs-4"></i>
-            <span class="fw-bold">{{ streakDays }}</span>
+            <span class="fw-bold">{{ streakDays}}</span>
           </div>
 
           <div class="position-relative">
@@ -84,9 +84,14 @@
               <Link :href="route('logout')" method="post" class="btn btn-sm fw-bold w-100" style="background-color: white; color: var(--bs-danger); border: 2px solid var(--bs-danger);">
                 <i class="bi bi-box-arrow-right"></i> Logout
               </Link>
-              <Link  :href="route('account.delete')" method="delete" class="btn btn-danger btn-sm fw-bold w-100 mt-2">
+              <Link 
+                href="#" 
+                class="btn btn-danger btn-sm fw-bold w-100 mt-2"
+                @click.prevent="confirmDelete"
+              >
                 <i class="bi bi-trash"></i> Delete account
               </Link>
+
             </div>
           </div>
         </div>
@@ -136,12 +141,34 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { usePage, Link } from '@inertiajs/vue3'
+import { usePage, Link, router } from '@inertiajs/vue3'
+import axios from 'axios'
+
+const confirmDelete = () => {
+  if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    router.delete(route('account.delete'))
+  }
+}
 
 const page = usePage()
 const notificationsCount = ref(page.props.auth?.user?.unread_notifications || 0)
-const streakDays = ref(page.props.auth?.user?.streak_days || 0)
+const streakDays = ref(page.props.auth?.user?.streakDays || 0)
 const user = page.props.auth?.user
+
+const fetchStreak = async () => {
+  try {
+    const response = await axios.get(route('user.streak'))
+    streakDays.value = response.data.streak
+  } catch (error) {
+    console.error('Error fetching streak:', error)
+  }
+}
+
+onMounted(() => {
+  fetchStreak() // call once on load
+})
+
+
 
 // Profile dropdown state
 const showProfileCard = ref(false)

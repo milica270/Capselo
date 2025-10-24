@@ -225,9 +225,22 @@ const change = (e) => {
 
 const submit = () => {
   form.post(route('store'), {
-    onError: () => form.reset('password', 'password_confirmation'),
+    onError: (errors) => {
+      // Reset sensitive fields
+      form.reset('password', 'password_confirmation')
+
+      // Alert the user
+      if (errors) {
+        // errors is an object with field errors from Laravel
+        const messages = Object.values(errors).flat().join('\n')
+        alert(messages)
+      } else {
+        alert("There was an error. Please try again.")
+      }
+    },
   })
 }
+
 
 
 
