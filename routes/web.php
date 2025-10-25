@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 Route::get('/', function () {
     return Inertia::render('Home');
@@ -106,44 +107,53 @@ Route::delete('/capsules/{capsule}/remove-invitation/{user}', [CapsuleController
 Route::put('/capsules/{capsule}/visibility', [CapsuleController::class, 'updateVisibility'])
     ->name('capsules.updateVisibility');
 
-
-
 Route::get('/user/streak', function () {
     $user = Auth::user();
     if (!$user) {
         return response()->json(['error' => 'Not authenticated'], 401);
     }
 
-    $streak = $user->streak();
+    $streakData = $user->streak();
 
-    // ✅ also update in DB
-    $user->update(['streak_days' => $streak]);
+    // ✅ update streak_days in DB for tracking purposes
+    $user->update(['streak_days' => $streakData['count']]);
 
-    return response()->json(['streak' => $streak]);
+    return response()->json([
+        'streak' => $streakData['count'],
+        'urgent' => $streakData['urgent']
+    ]);
 })->name('user.streak');
 
 
 
-Route::get('/calendar-status', function () {
+
+Route::get('/calendar-status', function (\Illuminate\Http\Request $request) {
     $user = auth()->user();
 
+    $month = $request->query('month', now()->month); // 1-12
+    $year = $request->query('year', now()->year);
+
     $capsules = $user->ownedCapsules()
-        ->whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
+        ->where('created_at', '<=', now())
         ->get();
 
     $days = [];
 
-    foreach (range(1, now()->daysInMonth) as $day) {
-        $hasPublished = $capsules->contains(function ($capsule) use ($day) {
-            return $capsule->is_ready() && $capsule->created_at->day == $day;
-        });
+foreach ($capsules as $capsule) {
+    $day = $capsule->created_at->day;
+    $month = $capsule->created_at->month;
+    $year = $capsule->created_at->year;
 
-        $days[$day] = $hasPublished; // true if published, false otherwise
-    }
+    $key = sprintf('%04d-%02d-%02d', $year, $month, $day);
+
+    // Assign true if ready, false if not
+    $days[$key] = $capsule->is_ready();
+}
+
+
 
     return response()->json($days);
-})->middleware('auth');
+});
 
 
 });

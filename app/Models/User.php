@@ -90,7 +90,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // In User.php (User model)
-
 public function streak()
 {
     // Get all capsules of the user, ordered by date descending (latest first)
@@ -100,28 +99,36 @@ public function streak()
         ->get();
 
     $streak = 0;
-
-    // Start from today, check each day backward
     $currentDate = now()->startOfDay();
 
+    // Check if user has published today
+    $hasPublishedToday = $capsules->contains(function ($capsule) use ($currentDate) {
+        return $capsule->is_ready() && $capsule->created_at->isSameDay($currentDate);
+    });
+
+    // If user hasn’t published today, start checking from yesterday instead
+    $dateToCheck = $hasPublishedToday ? $currentDate : $currentDate->copy()->subDay();
+
     while (true) {
-        // Check if there is at least one published capsule on this day
-        $hasPublished = $capsules->contains(function ($capsule) use ($currentDate) {
-            return $capsule->is_ready() && $capsule->created_at->isSameDay($currentDate);
+        $hasPublished = $capsules->contains(function ($capsule) use ($dateToCheck) {
+            return $capsule->is_ready() && $capsule->created_at->isSameDay($dateToCheck);
         });
 
         if ($hasPublished) {
             $streak++;
-            $currentDate->subDay(); // go to previous day
+            $dateToCheck->subDay();
         } else {
-            break; // streak broken
+            break;
         }
     }
 
-    return $streak;
+    // Return both streak and urgency indicator
+    return [
+        'count' => $streak,
+        'urgent' => !$hasPublishedToday, // true if user hasn’t published today
+    ];
 }
 
-    
 }
 
 

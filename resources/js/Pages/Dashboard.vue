@@ -72,10 +72,12 @@
             <i class="bi bi-bell-fill fs-4"></i>
             <span>{{user.notifications}}</span>
             </div>
-            <div>
-              <i class="bi bi-fire fs-4"></i>
-            <span>{{user.streak_days}}</span>
-            </div>
+            <div class="streak-container">
+              <span v-if="urgent" class="streak-urgent text-danger fw-bold fs-3">!</span>
+              <i class="bi bi-fire fs-4" style="color: orange"></i>
+    <span class="streak-number">{{ streak }}</span>
+    
+  </div>
           </div>
           <div class="d-flex gap-3">
           <Link :href="route('logout')" method="post" class="btn btn-sm fw-bold w-100" style="background-color: white; color: var(--bs-danger); border: 2px solid var(--bs-danger);">
@@ -853,10 +855,27 @@
 
 <script setup>
 import FriendCard from '../Components/FriendCard.vue'
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 import hashtagsData from '../data/hashtags.json'
 import { showToast } from '../utils/toast.js'
+import axios from 'axios';
+
+
+const streak = ref(0);
+const urgent = ref(false);
+
+const fetchStreak = async () => {
+  try {
+    const response = await axios.get('/user/streak');
+    streak.value = response.data.streak;
+    urgent.value = response.data.urgent;
+  } catch (error) {
+    console.error('Failed to fetch streak:', error);
+  }
+};
+
+onMounted(fetchStreak);
 
 
 const confirmDelete = () => {
@@ -1295,4 +1314,6 @@ const saveVisibility = () => {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+
 </style>

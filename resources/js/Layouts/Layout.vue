@@ -47,9 +47,20 @@
           </Link>
 
           <div class="d-flex align-items-center gap-1">
-            <i class="bi bi-fire fs-4"></i>
-            <span class="fw-bold">{{ streakDays}}</span>
-          </div>
+            <div class="str">
+  <span class="fw-bold fs-3" style="color: var(--bs-danger)" v-if="urgent">!</span>
+  <i class="bi bi-fire fs-4"></i>
+  <div class="str-tooltip">
+    Keep the fire alive — one capsule away!🔥
+  </div>
+</div>
+          <span 
+            class="fw-bold" 
+          >
+            {{ streakDays }}
+          </span>
+        </div>
+
 
           <div class="position-relative">
             <img 
@@ -154,11 +165,13 @@ const page = usePage()
 const notificationsCount = ref(page.props.auth?.user?.unread_notifications || 0)
 const streakDays = ref(page.props.auth?.user?.streakDays || 0)
 const user = page.props.auth?.user
+const urgent = ref(false)
 
 const fetchStreak = async () => {
   try {
     const response = await axios.get(route('user.streak'))
     streakDays.value = response.data.streak
+    urgent.value = response.data.urgent
   } catch (error) {
     console.error('Error fetching streak:', error)
   }
@@ -166,6 +179,7 @@ const fetchStreak = async () => {
 
 onMounted(() => {
   fetchStreak() // call once on load
+  console.log(urgent);
 })
 
 
@@ -223,6 +237,35 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.str {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.str-tooltip {
+  position: absolute;
+  bottom: -38px; /* was -45px → move it a bit higher */
+  left: 30%; /* keep it slightly left */
+  transform: translateX(-50%) translateY(0);
+  background: white;
+  color: black;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+}
+
+.str:hover .str-tooltip {
+  opacity: 1;
+  transform: translateX(-70%) translateY(2px); /* slightly down for animation */
+}
+
+
 </style>
 
 
