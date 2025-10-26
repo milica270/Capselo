@@ -11,41 +11,7 @@
 
         <div class="position-sticky" style="top: 6.5rem;">
 
-      <div class="d-flex align-items-center gap-2 mb-3 w-100  filter-bar">
-          <!-- Visibility Filter -->
-          <select
-            v-model="selectedVisibility"
-            class="form-select form-select-sm fw-bold"
-            style="max-width: 180px; cursor:pointer"
-          >
-            <option value="all">All Capsules</option>
-            <option value="me">Private Capsules</option>
-            <option value="friends">Friends Capsules</option>
-            <option value="everyone">Public Capsules</option>
-            <option value="premium">Premium Capsules</option>
-          </select>
-
-          <!-- Hashtag Search -->
-          <div class="input-group input-group-sm" style="max-width: 250px;">
-            <span class="input-group-text bg-white text-muted">
-              <i class="bi bi-hash"></i>
-            </span>
-            <input
-              type="text"
-              v-model="searchQuery"
-              class="form-control"
-              placeholder="Search by hashtag..."
-            />
-          </div>
-
-          <!-- Reset Filters Button -->
-          <button
-            class="btn btn-outline-success btn-sm fw-bold"
-            @click="resetFilters"
-          >
-            <i class="bi bi-arrow-repeat"></i>
-          </button>
-        </div>
+      
 
       <!-- 🗓️ CALENDAR SECTION -->
       
@@ -95,6 +61,43 @@
 </div>
 
           </div>
+        </div>
+
+
+        <div class="d-flex align-items-center gap-2 mt-3 w-100  filter-bar">
+          <!-- Visibility Filter -->
+          <select
+            v-model="selectedVisibility"
+            class="form-select form-select-sm fw-bold"
+            style="max-width: 180px; cursor:pointer"
+          >
+            <option value="all">All Capsules</option>
+            <option value="me">Private Capsules</option>
+            <option value="friends">Friends Capsules</option>
+            <option value="everyone">Public Capsules</option>
+            <option value="premium">Premium Capsules</option>
+          </select>
+
+          <!-- Hashtag Search -->
+          <div class="input-group input-group-sm" style="max-width: 250px;">
+            <span class="input-group-text bg-white text-muted">
+              <i class="bi bi-hash"></i>
+            </span>
+            <input
+              type="text"
+              v-model="searchQuery"
+              class="form-control"
+              placeholder="Search by hashtag..."
+            />
+          </div>
+
+          <!-- Reset Filters Button -->
+          <button
+            class="btn btn-outline-success btn-sm fw-bold"
+            @click="resetFilters"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+          </button>
         </div>
 
         </div>
@@ -572,6 +575,7 @@ const isTodayPublished = day => {
 }
 .calendar-day.published span {
   background-color: var(--bs-primary);
+  cursor: pointer;
 }
 .calendar-day.unpublished span {
   background-color: lightcoral;
