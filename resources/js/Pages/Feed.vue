@@ -4,12 +4,52 @@
   </Head>
 
   <div class="container-fluid bg-light py-4 min-vh-100">
-    <div class="row mt-3">
+    <div class="row mt-2">
       <div class="col-md-1"></div>
 
-      <!-- 🗓️ CALENDAR SECTION -->
       <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+
+        <div class="position-sticky" style="top: 6.5rem;">
+
+      <div class="d-flex align-items-center gap-2 mb-3 w-100  filter-bar">
+          <!-- Visibility Filter -->
+          <select
+            v-model="selectedVisibility"
+            class="form-select form-select-sm fw-bold"
+            style="max-width: 180px; cursor:pointer"
+          >
+            <option value="all">All Capsules</option>
+            <option value="me">Private Capsules</option>
+            <option value="friends">Friends Capsules</option>
+            <option value="everyone">Public Capsules</option>
+            <option value="premium">Premium Capsules</option>
+          </select>
+
+          <!-- Hashtag Search -->
+          <div class="input-group input-group-sm" style="max-width: 250px;">
+            <span class="input-group-text bg-white text-muted">
+              <i class="bi bi-hash"></i>
+            </span>
+            <input
+              type="text"
+              v-model="searchQuery"
+              class="form-control"
+              placeholder="Search by hashtag..."
+            />
+          </div>
+
+          <!-- Reset Filters Button -->
+          <button
+            class="btn btn-outline-success btn-sm fw-bold"
+            @click="resetFilters"
+          >
+            <i class="bi bi-arrow-repeat"></i>
+          </button>
+        </div>
+
+      <!-- 🗓️ CALENDAR SECTION -->
+      
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" >
           <div class="d-flex justify-content-between align-items-center mb-4">
   <button class="btn btn-outline-success btn-sm fw-bold" @click="previousMonth">
     <i class="bi bi-chevron-left"></i>
@@ -46,7 +86,7 @@
     unpublished: isUnpublished(day)
   }"
 >
-  <span v-if="day">{{ day }}</span>
+  <span v-if="day" :class="{'today-published-number': isTodayPublished(day)}">{{ day }}</span>
 
   <div
     v-if="isToday(day)"
@@ -56,46 +96,14 @@
 
           </div>
         </div>
+
+        </div>
       </div>
 
       <!-- 📰 FEED SECTION -->
       <div class="col-md-6">
         <!-- 🔹 FILTER BAR -->
-        <div class="d-flex align-items-center gap-2 mb-4 w-100">
-          <!-- Visibility Filter -->
-          <select
-            v-model="selectedVisibility"
-            class="form-select form-select-sm fw-bold"
-            style="max-width: 180px; cursor:pointer"
-          >
-            <option value="all">All Capsules</option>
-            <option value="me">Private Capsules</option>
-            <option value="friends">Friends Capsules</option>
-            <option value="everyone">Public Capsules</option>
-            <option value="premium">Premium Capsules</option>
-          </select>
-
-          <!-- Hashtag Search -->
-          <div class="input-group input-group-sm" style="max-width: 250px;">
-            <span class="input-group-text bg-white text-muted">
-              <i class="bi bi-hash"></i>
-            </span>
-            <input
-              type="text"
-              v-model="searchQuery"
-              class="form-control"
-              placeholder="Search by hashtag..."
-            />
-          </div>
-
-          <!-- Reset Filters Button -->
-          <button
-            class="btn btn-outline-success btn-sm fw-bold"
-            @click="resetFilters"
-          >
-            <i class="bi bi-arrow-repeat"></i>
-          </button>
-        </div>
+        
 
         <!-- Empty state -->
         <div v-if="capsules.length === 0" class="text-center text-muted mt-5">
@@ -449,6 +457,15 @@ const closeModal = () => {
   modalCapsule.value = null
   document.body.style.overflow = ''
 }
+
+
+const isTodayPublished = day => {
+  if (!day) return false
+  const current = new Date()
+  const key = `${current.getFullYear()}-${current.getMonth() + 1}-${current.getDate()}`
+  return day === current.getDate() && dayStatus.value[key] === true
+}
+
 </script>
 
 <style scoped>
@@ -563,4 +580,27 @@ const closeModal = () => {
   background-color: #fff3cd;
   color: #212529;
 }
+
+.today-published-number {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--bs-primary);
+  color: var(--bs-primary);
+  font-weight: 700;
+  background-color: white;
+}
+
+.filter-bar {
+  background-color: rgba(255, 255, 255, 0.95); /* slightly transparent */
+  backdrop-filter: blur(5px); /* adds soft blur to content underneath */
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
 </style>

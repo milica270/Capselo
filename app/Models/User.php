@@ -122,10 +122,11 @@ public function streak()
         }
     }
 
+    $urgent = $streak === 0 ? false : !$hasPublishedToday;
     // Return both streak and urgency indicator
     return [
         'count' => $streak,
-        'urgent' => !$hasPublishedToday, // true if user hasn’t published today
+        'urgent' => $urgent, // true if user hasn’t published today
     ];
 }
 

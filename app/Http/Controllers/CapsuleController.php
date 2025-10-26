@@ -98,7 +98,7 @@ class CapsuleController extends Controller
     public function addImage(Request $request, $capsuleId)
     {
         $request->validate([
-            'image' => 'required|image|max:2048',
+            'image' => 'required',
         ]);
 
         $capsule = Capsule::findOrFail($capsuleId);
