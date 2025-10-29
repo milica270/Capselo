@@ -156,6 +156,27 @@ foreach ($capsules as $capsule) {
 });
 
 
+Route::get('/capsules/{date}', function ($date) {
+    $user = auth()->user();
+
+    $capsules = $user->ownedCapsules()
+        ->with('images')
+        ->whereDate('created_at', $date)
+        ->whereHas('owner', fn($q) => $q->where('id', $user->id))
+        ->with(['users' => function ($q) {
+            $q->withPivot('ready');
+        }, 'images', 'owner'])
+        ->get();
+
+    return inertia('ByDate', [
+        'user' => $user,
+        'capsules' => $capsules,
+        'date' => $date
+    ]);
+})->name('capsules.byDate');
+
+
+
 });
 
 Route::delete('/account/delete', [AuthController::class, 'delete_user'])->middleware('auth')->name('account.delete');

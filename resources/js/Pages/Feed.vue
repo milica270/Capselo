@@ -51,6 +51,7 @@
     published: isPublished(day),
     unpublished: isUnpublished(day)
   }"
+  @click="handleDayClick(day)"
 >
   <span v-if="day" :class="{'today-published-number': isTodayPublished(day)}">{{ day }}</span>
 
@@ -87,7 +88,7 @@
               type="text"
               v-model="searchQuery"
               class="form-control"
-              placeholder="Search by hashtag..."
+              placeholder="hashtag"
             />
           </div>
 
@@ -467,6 +468,15 @@ const isTodayPublished = day => {
   const current = new Date()
   const key = `${current.getFullYear()}-${current.getMonth() + 1}-${current.getDate()}`
   return day === current.getDate() && dayStatus.value[key] === true
+}
+
+
+const handleDayClick = (day) => {
+  if (!isPublished(day)) return // Only allow click on published days
+
+  const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+
+  window.location.href = route('capsules.byDate', formattedDate)
 }
 
 </script>
