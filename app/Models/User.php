@@ -130,6 +130,13 @@ public function streak()
     ];
 }
 
+
+public function badges()
+{
+    return $this->belongsToMany(Badge::class, 'user_badges')
+                ->withTimestamps();
+}
+
 }
 
 

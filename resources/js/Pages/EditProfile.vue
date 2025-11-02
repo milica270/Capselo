@@ -5,10 +5,10 @@
 
   <div class="container-fluid mt-3 bg-light">
     <div class="row">
-      <div class="col-md-1"></div>
+      <div class="col-md-3"></div>
 
       <!-- Form Column -->
-      <div class="col-md-3">
+      <div class="col-md-6">
         <form @submit.prevent="submit" enctype="multipart/form-data" class="d-flex flex-column gap-3 p-3 bg-white rounded shadow-sm">
           
           <!-- Avatar Preview + Upload -->
@@ -152,8 +152,8 @@
         </form>
       </div>
 
-      <div class="col-md-7">..</div>
-      <div class="col-md-1"></div>
+      
+      <div class="col-md-3"></div>
     </div>
   </div>
 </template>

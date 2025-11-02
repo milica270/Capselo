@@ -8,108 +8,97 @@
       <div class="col-md-1"></div>
 
       <div class="col-md-4 mb-4">
-
         <div class="position-sticky" style="top: 6.5rem;">
 
-      
+          <!-- 🗓️ CALENDAR SECTION -->
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <button class="btn btn-outline-success btn-sm fw-bold" @click="previousMonth">
+                <i class="bi bi-chevron-left"></i>
+              </button>
 
-      <!-- 🗓️ CALENDAR SECTION -->
-      
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" >
-          <div class="d-flex justify-content-between align-items-center mb-4">
-  <button class="btn btn-outline-success btn-sm fw-bold" @click="previousMonth">
-    <i class="bi bi-chevron-left"></i>
-  </button>
+              <h3 class="fw-bold mb-0 text-success text-center">
+                {{ currentMonthName }} {{ currentYear }}
+              </h3>
 
-  <h3 class="fw-bold mb-0 text-success text-center">
-    {{ currentMonthName }} {{ currentYear }}
-  </h3>
+              <button class="btn btn-outline-success btn-sm fw-bold" @click="nextMonth">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
 
-  <button class="btn btn-outline-success btn-sm fw-bold" @click="nextMonth">
-    <i class="bi bi-chevron-right"></i>
-  </button>
-</div>
-
-
-          <!-- Weekday headers -->
-          <div
-            class="d-grid text-center fw-semibold mb-2 text-success small"
-            :style="{ gridTemplateColumns: 'repeat(7, 1fr)' }"
-          >
-            <div v-for="day in weekDays" :key="day">{{ day }}</div>
-          </div>
-
-          <!-- Days grid -->
-          <div class="d-grid calendar-grid">
+            <!-- Weekday headers -->
             <div
-  v-for="(day, index) in daysInMonth"
-  :key="index"
-  class="calendar-day d-flex justify-content-center align-items-center position-relative"
-  :class="{
-    empty: !day,
-    today: isToday(day),
-    published: isPublished(day),
-    unpublished: isUnpublished(day)
-  }"
-  @click="handleDayClick(day)"
->
-  <span v-if="day" :class="{'today-published-number': isTodayPublished(day)}">{{ day }}</span>
+              class="d-grid text-center fw-semibold mb-2 text-success small"
+              :style="{ gridTemplateColumns: 'repeat(7, 1fr)' }"
+            >
+              <div v-for="day in weekDays" :key="day">{{ day }}</div>
+            </div>
 
-  <div
-    v-if="isToday(day)"
-    class="today-dot bg-warning rounded-circle position-absolute"
-  ></div>
-</div>
+            <!-- Days grid -->
+            <div class="d-grid calendar-grid">
+              <div
+                v-for="(day, index) in daysInMonth"
+                :key="index"
+                class="calendar-day d-flex justify-content-center align-items-center position-relative"
+                :class="{
+                  empty: !day,
+                  today: isToday(day),
+                  published: isPublished(day),
+                  unpublished: isUnpublished(day)
+                }"
+                @click="handleDayClick(day)"
+              >
+                <span v-if="day" :class="{'today-published-number': isTodayPublished(day)}">{{ day }}</span>
 
-          </div>
-        </div>
-
-
-        <div class="d-flex align-items-center gap-2 mt-3 w-100  filter-bar">
-          <!-- Visibility Filter -->
-          <select
-            v-model="selectedVisibility"
-            class="form-select form-select-sm fw-bold"
-            style="max-width: 180px; cursor:pointer"
-          >
-            <option value="all">All Capsules</option>
-            <option value="me">Private Capsules</option>
-            <option value="friends">Friends Capsules</option>
-            <option value="everyone">Public Capsules</option>
-            <option value="premium">Premium Capsules</option>
-          </select>
-
-          <!-- Hashtag Search -->
-          <div class="input-group input-group-sm" style="max-width: 250px;">
-            <span class="input-group-text bg-white text-muted">
-              <i class="bi bi-hash"></i>
-            </span>
-            <input
-              type="text"
-              v-model="searchQuery"
-              class="form-control"
-              placeholder="hashtag"
-            />
+                <div
+                  v-if="isToday(day)"
+                  class="today-dot bg-warning rounded-circle position-absolute"
+                ></div>
+              </div>
+            </div>
           </div>
 
-          <!-- Reset Filters Button -->
-          <button
-            class="btn btn-outline-success btn-sm fw-bold"
-            @click="resetFilters"
-          >
-            <i class="bi bi-arrow-repeat"></i>
-          </button>
-        </div>
+          <!-- Filter bar -->
+          <div class="d-flex align-items-center gap-2 mt-3 w-100 filter-bar">
+            <!-- Visibility Filter -->
+            <select
+              v-model="selectedVisibility"
+              class="form-select form-select-sm fw-bold"
+              style="max-width: 180px; cursor:pointer"
+            >
+              <option value="all">All Capsules</option>
+              <option value="me">Private Capsules</option>
+              <option value="friends">Friends Capsules</option>
+              <option value="everyone">Public Capsules</option>
+              <option value="premium">Premium Capsules</option>
+            </select>
 
+            <!-- Hashtag Search -->
+            <div class="input-group input-group-sm" style="max-width: 250px;">
+              <span class="input-group-text bg-white text-muted">
+                <i class="bi bi-hash"></i>
+              </span>
+              <input
+                type="text"
+                v-model="searchQuery"
+                class="form-control"
+                placeholder="hashtag"
+              />
+            </div>
+
+            <!-- Reset Filters Button -->
+            <button
+              class="btn btn-outline-success btn-sm fw-bold"
+              @click="resetFilters"
+            >
+              <i class="bi bi-arrow-repeat"></i>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- 📰 FEED SECTION -->
       <div class="col-md-6">
-        <!-- 🔹 FILTER BAR -->
-        
-
-        <!-- Empty state -->
         <div v-if="capsules.length === 0" class="text-center text-muted mt-5">
           No capsules to show yet.
         </div>
@@ -122,7 +111,6 @@
         >
           <!-- Header -->
           <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-            <!-- Participants -->
             <div class="d-flex align-items-center flex-wrap gap-2">
               <template
                 v-for="(participant, index) in [capsule.owner, ...capsule.users]"
@@ -134,11 +122,7 @@
                 >
                   <img
                     class="rounded-5"
-                    :src="
-                      participant.avatar
-                        ? `/storage/${participant.avatar}`
-                        : '/images/default-avatar.png'
-                    "
+                    :src="participant.avatar ? `/storage/${participant.avatar}` : '/images/default-avatar.png'"
                     alt="avatar"
                     :class="{
                       'owner-avatar': index === 0,
@@ -226,11 +210,9 @@
             <span class="dot">.</span>
           </h4>
 
-          <!-- Close button -->
           <button class="btn btn-danger btn-sm" @click="closeModal">X</button>
         </div>
 
-        <!-- Participants -->
         <div
           class="d-flex align-items-center flex-wrap gap-3 mb-3 justify-content-start"
         >
@@ -244,11 +226,7 @@
             >
               <img
                 class="rounded-5"
-                :src="
-                  participant.avatar
-                    ? `/storage/${participant.avatar}`
-                    : '/images/default-avatar.png'
-                "
+                :src="participant.avatar ? `/storage/${participant.avatar}` : '/images/default-avatar.png'"
                 alt="avatar"
                 :class="{
                   'owner-avatar': index === 0,
@@ -272,12 +250,10 @@
           </template>
         </div>
 
-        <!-- Capsule description -->
         <p class="mb-3" style="font-size: 1.2rem; white-space: pre-wrap;">
           {{ modalCapsule.description }}
         </p>
 
-        <!-- Capsule images -->
         <div class="d-flex flex-wrap gap-3 mb-3 justify-content-start">
           <img
             v-for="image in modalCapsule.images"
@@ -290,7 +266,6 @@
           />
         </div>
 
-        <!-- Created date -->
         <div class="d-flex justify-content-end me-3">
           <p class="text-muted small mb-0">
             <i class="bi bi-clock-fill"></i>
@@ -309,69 +284,52 @@
 
 <script setup>
 import { Head } from '@inertiajs/vue3'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
 
-// 🧩 Props
+// Props
 const props = defineProps({
   user: Object,
   friends: Array,
   capsules: Array
 })
 
-// 📅 Calendar Data
+// Calendar state
 const dayStatus = ref({})
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const now = new Date()
-
-const today = now.getDate()
-
-
-
 const month = ref(now.getMonth())
 const year = ref(now.getFullYear())
 
 const currentMonthName = computed(() =>
   new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year.value, month.value))
 )
-
 const currentYear = computed(() => year.value)
 
 const daysInMonth = computed(() => {
-  const firstDay = new Date(year.value, month.value, 1).getDay() // 0 = Sunday
+  const firstDay = new Date(year.value, month.value, 1).getDay()
   const totalDays = new Date(year.value, month.value + 1, 0).getDate()
-
-  // Add placeholders for empty days before the first real day
   const days = Array.from({ length: firstDay }, () => null)
-
-  // Add real days (1..totalDays)
-  for (let i = 1; i <= totalDays; i++) {
-    days.push(i)
-  }
-
+  for (let i = 1; i <= totalDays; i++) days.push(i)
   return days
 })
 
-
-// Move to previous/next month
+// Navigation
 const previousMonth = () => {
   if (month.value === 0) {
     month.value = 11
     year.value--
-  } else {
-    month.value--
-  }
+  } else month.value--
 }
 
 const nextMonth = () => {
   if (month.value === 11) {
     month.value = 0
     year.value++
-  } else {
-    month.value++
-  }
+  } else month.value++
 }
 
+// Calendar helpers
 const isToday = day => {
   if (!day) return false
   const current = new Date()
@@ -381,77 +339,80 @@ const isToday = day => {
     year.value === current.getFullYear()
   )
 }
-
 const isPublished = day => {
   if (!day) return false
-  const key = `${year.value}-${month.value + 1}-${day}`
+  const key = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   return dayStatus.value[key] === true
 }
 
 const isUnpublished = day => {
   if (!day) return false
-  const key = `${year.value}-${month.value + 1}-${day}`
+  const key = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   return dayStatus.value[key] === false
 }
 
 
-// 📱 Mobile check
-const isMobile = ref(false)
-const checkScreen = () => {
-  isMobile.value = window.innerWidth <= 768
+
+const isTodayPublished = day => {
+  if (!day) return false
+  const current = new Date()
+  const key = `${current.getFullYear()}-${current.getMonth() + 1}-${current.getDate()}`
+  return day === current.getDate() && dayStatus.value[key] === true
 }
 
-// ⚙️ Lifecycle
-onMounted(async () => {
-  checkScreen()
-  window.addEventListener('resize', checkScreen)
-
+// Load data
+const loadCalendarData = async () => {
   try {
     const response = await axios.get('/calendar-status', {
-  params: {
-    month: month.value + 1, // JS month is 0-based
-    year: year.value
-  }
-});
-dayStatus.value = response.data
-
+      params: {
+        month: month.value + 1,
+        year: year.value
+      }
+    })
+    dayStatus.value = response.data
   } catch (error) {
     console.error('Error loading calendar data:', error)
   }
+}
+
+// Responsive check
+const isMobile = ref(false)
+const checkScreen = () => (isMobile.value = window.innerWidth <= 768)
+
+// Lifecycle
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+  loadCalendarData()
+})
+onUnmounted(() => window.removeEventListener('resize', checkScreen))
+
+// Watch month/year changes
+watch([month, year], () => {
+  loadCalendarData()
 })
 
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreen)
-})
-
-// 🔍 Filters
+// Filters
 const selectedVisibility = ref('all')
 const searchQuery = ref('')
 
-// Filtered capsules
-const filteredCapsules = computed(() => {
-  return props.capsules.filter(capsule => {
+const filteredCapsules = computed(() =>
+  props.capsules.filter(capsule => {
     const matchesVisibility =
       selectedVisibility.value === 'all' ||
       capsule.visible_to === selectedVisibility.value
-
     const matchesSearch =
       !searchQuery.value ||
-      capsule.description
-        .toLowerCase()
-        .includes(searchQuery.value.toLowerCase())
-
+      capsule.description.toLowerCase().includes(searchQuery.value.toLowerCase())
     return matchesVisibility && matchesSearch
   })
-})
-
-// Reset filters
+)
 const resetFilters = () => {
   selectedVisibility.value = 'all'
   searchQuery.value = ''
 }
 
-// 🧊 Modal logic
+// Modal
 const modalCapsule = ref(null)
 const openModal = capsule => {
   modalCapsule.value = capsule
@@ -462,31 +423,20 @@ const closeModal = () => {
   document.body.style.overflow = ''
 }
 
-
-const isTodayPublished = day => {
-  if (!day) return false
-  const current = new Date()
-  const key = `${current.getFullYear()}-${current.getMonth() + 1}-${current.getDate()}`
-  return day === current.getDate() && dayStatus.value[key] === true
-}
-
-
-const handleDayClick = (day) => {
-  if (!isPublished(day)) return // Only allow click on published days
-
-  const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-
+// Handle click
+const handleDayClick = day => {
+  if (!isPublished(day)) return
+  const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(
+    day
+  ).padStart(2, '0')}`
   window.location.href = route('capsules.byDate', formattedDate)
 }
-
 </script>
 
 <style scoped>
 .cp {
   border-radius: 15%;
 }
-
-/* 👤 Owner styling */
 .owner-avatar {
   width: 45px;
   height: 45px;
@@ -497,8 +447,6 @@ const handleDayClick = (day) => {
   font-size: 1rem;
   color: var(--bs-dark);
 }
-
-/* 👥 Friend styling */
 .friend-avatar {
   width: 35px;
   height: 35px;
@@ -509,13 +457,9 @@ const handleDayClick = (day) => {
   font-size: 0.9rem;
   color: var(--darkGrey);
 }
-
-/* 🖼️ Images hover */
 .feed-image:hover {
   transform: scale(1.05);
 }
-
-/* 🪟 Modal styling */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -540,8 +484,6 @@ const handleDayClick = (day) => {
 .capsule-title .dot {
   color: var(--bs-success);
 }
-
-/* 🗓️ Calendar styling */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -594,7 +536,6 @@ const handleDayClick = (day) => {
   background-color: #fff3cd;
   color: #212529;
 }
-
 .today-published-number {
   display: inline-flex;
   justify-content: center;
@@ -607,14 +548,11 @@ const handleDayClick = (day) => {
   font-weight: 700;
   background-color: white;
 }
-
 .filter-bar {
-  background-color: rgba(255, 255, 255, 0.95); /* slightly transparent */
-  backdrop-filter: blur(5px); /* adds soft blur to content underneath */
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
-
 </style>
