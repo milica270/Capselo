@@ -356,9 +356,10 @@ const isUnpublished = day => {
 const isTodayPublished = day => {
   if (!day) return false
   const current = new Date()
-  const key = `${current.getFullYear()}-${current.getMonth() + 1}-${current.getDate()}`
-  return day === current.getDate() && dayStatus.value[key] === true
+  const key = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`
+  return String(day).padStart(2, '0') === String(current.getDate()).padStart(2, '0') && dayStatus.value[key] === true
 }
+
 
 // Load data
 const loadCalendarData = async () => {
