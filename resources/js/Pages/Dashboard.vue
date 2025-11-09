@@ -98,10 +98,35 @@
         
       </div>
 
-      <div class="col-md-3"></div>
+    <div class="col-md-7">
+      <div class="p-3 bg-white rounded h-100 shadow-sm">
+  <div v-if="badges">
+    <div v-for="(images, category) in badges" :key="category" class="mb-5">
+      <h6 style="color: var(--lightGrey)" class="text-uppercase mb-3">{{ category }}</h6>
+      <div class="d-flex flex-wrap gap-2">
+        <div
+          v-for="(src, index) in images"
+          :key="index"
+          class="badge-card text-center"
+          style="width: 40px"
+        >
+          <img
+            :src="src"
+            :alt="`${category} badge`"
+            class="img-fluid rounded"
+            style="width: 100%; border-radius: 12px"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <!-- Empty space -->
-      <div class="col-md-7"></div>
+  <div v-else class="text-muted">Loading badges...</div>
+  </div>
+</div>
+
+
+      
       <div class="col-md-1"></div>
     </div>
     <div class="row mt-3">
@@ -1276,6 +1301,17 @@ const saveVisibility = () => {
     }
   })
 }
+
+const badges = ref(null)
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('/badges')
+    badges.value = response.data
+  } catch (error) {
+    console.error('Failed to load badges:', error)
+  }
+})
 
 
 

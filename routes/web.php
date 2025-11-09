@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
 
 Route::get('/', function () {
     return Inertia::render('Home');
@@ -175,6 +176,22 @@ Route::get('/capsules/{date}', function ($date) {
     ]);
 })->name('capsules.byDate');
 
+
+Route::get('/badges', function () {
+    $basePath = public_path('storage/badges');
+    $categories = [];
+
+    foreach (File::directories($basePath) as $dir) {
+        $categoryName = basename($dir);
+        $files = collect(File::files($dir))
+            ->map(fn($file) => asset('storage/badges/' . $categoryName . '/' . $file->getFilename()))
+            ->values();
+
+        $categories[$categoryName] = $files;
+    }
+
+    return response()->json($categories);
+});
 
 
 });
