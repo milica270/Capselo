@@ -6,7 +6,7 @@
 
     <!-- Logo + Title at top-left -->
     <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
-      <img src="../../../../public/storage/logo/logo.png" alt="Capselo Logo" width="60" />
+      <img src="/public/storage/logo/logo.png" alt="Capselo Logo" width="60" />
       <div class="ms-2">
         <h3 class="fw-bold mb-0">
           <span style="color: black; text-decoration: underline; text-decoration-color: var(--bs-success);">Capselo</span>
