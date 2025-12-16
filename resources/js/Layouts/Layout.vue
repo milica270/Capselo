@@ -112,7 +112,7 @@
         <div style="background-color: white;" class="rounded-pill text-center">
           <div class="d-flex align-items-center justify-content-center">
             <img 
-              src="../../../../public/storage/logo/logo.png" 
+              src="/public/storage/logo/logo.png" 
               alt="Capselo Logo" 
               width="30"
             >
