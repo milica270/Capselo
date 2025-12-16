@@ -68,10 +68,7 @@
           <div class="d-lg-none">
             <hr class="my-1">
           <div class="d-flex justify-content-center gap-4 mt-3 mb-4">
-            <div>
-            <i class="bi bi-bell-fill fs-4"></i>
-            <span>{{user.notifications}}</span>
-            </div>
+            
             <div class="streak-container">
               <span v-if="urgent" class="streak-urgent text-danger fw-bold fs-3">!</span>
               <i class="bi bi-fire fs-4" style="color: orange"></i>
@@ -101,8 +98,12 @@
     <div class="col-md-7">
       <div class="p-3 bg-white rounded h-100 shadow-sm">
   <div v-if="badges">
-    <div v-for="(images, category) in badges" :key="category" class="mb-5">
-      <h6 style="color: var(--lightGrey)" class="text-uppercase mb-3">{{ category }}</h6>
+    <div
+  v-for="(images, category) in filteredBadges"
+  :key="category"
+  class="mb-2"
+>
+      <h6 style="color: var(--lightGrey)" class="text-uppercase">{{ category }}</h6>
       <div class="d-flex flex-wrap gap-2">
         <div
           v-for="(src, index) in images"
@@ -119,7 +120,9 @@
         </div>
       </div>
     </div>
+    <Link class="">View All</Link>
   </div>
+
 
   <div v-else class="text-muted">Loading badges...</div>
   </div>
@@ -1313,7 +1316,15 @@ onMounted(async () => {
   }
 })
 
-
+const filteredBadges = computed(() => {
+  if (!badges.value) return {}
+  const allowed = ['consistency', 'time-limited', 'work']
+  return Object.fromEntries(
+    Object.entries(badges.value).filter(([category]) =>
+      allowed.includes(category.toLowerCase())
+    )
+  )
+})
 
 </script>
 

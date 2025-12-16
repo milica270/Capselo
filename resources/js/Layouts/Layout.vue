@@ -39,12 +39,7 @@
 
         <!-- RIGHT ITEMS -->
         <div class="d-flex align-items-center gap-3 ms-auto mt-2 mt-lg-0 right-items">
-          <Link :href="route('notifications')" class="text-white position-relative">
-            <i class="bi bi-bell-fill fs-4"></i>
-            <span v-if="notificationsCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              {{ notificationsCount }}
-            </span>
-          </Link>
+          
 
           <div class="d-flex align-items-center gap-1">
             <div class="str">
